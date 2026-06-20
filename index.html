@@ -16,6 +16,14 @@
     <div class="blob shape-2"></div>
     <div class="blob shape-3"></div>
 
+    <!-- Floating Glass Particles -->
+    <div class="glass-particle p1"></div>
+    <div class="glass-particle p2"></div>
+    <div class="glass-particle p3"></div>
+    <div class="glass-particle p4"></div>
+    <div class="glass-particle p5"></div>
+    <div class="glass-particle p6"></div>
+
     <div class="glass-card">
         <div class="header">
             <h1 class="title">Wi-Fi Connect</h1>
@@ -44,6 +52,16 @@
                 <div class="pwd-label">Kata Sandi Wi-Fi:</div>
                 <div class="pwd-value" id="wifi-password-display">Loading...</div>
             </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="download-btn" onclick="copyPassword()" id="copy-btn" style="margin-bottom: 0;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Salin Sandi
+                </button>
+                <button class="download-btn" onclick="openWifiSettings()" style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.1);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Buka Pengaturan Wi-Fi
+                </button>
+            </div>
         </div>
         
         <div class="footer">
@@ -63,16 +81,16 @@
                 // Display Password on UI
                 document.getElementById('wifi-password-display').innerText = password;
 
-                // Wi-Fi string format: WIFI:T:<encryption>;S:<ssid>;P:<password>;;
-                const wifiString = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+                // Wi-Fi string format yang paling standar: WIFI:S:<ssid>;T:<encryption>;P:<password>;;
+                const wifiString = `WIFI:S:${ssid};T:${encryption};P:${password};;`;
                 
                 // Generate QR Code with custom styling
                 new QRCode(document.getElementById("qrcode"), {
                     text: wifiString,
-                    width: 220,
-                    height: 220,
-                    colorDark : "#1a1a1a",
-                    colorLight : "#ffffff",
+                    width: 150,
+                    height: 150,
+                    colorDark : "#000000",
+                    colorLight : "transparent",
                     correctLevel : QRCode.CorrectLevel.H
                 });
             } else {
@@ -128,6 +146,39 @@
                 } else {
                     alert("Gagal mengunduh QR Code. Coba muat ulang halaman.");
                 }
+            }
+        }
+
+        // Copy Password Function
+        function copyPassword() {
+            if (typeof wifiConfig !== 'undefined') {
+                navigator.clipboard.writeText(wifiConfig.password).then(() => {
+                    const btn = document.getElementById('copy-btn');
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Tersalin!';
+                    btn.style.background = 'rgba(16, 185, 129, 0.5)'; // Glassy green
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.style.background = ''; // Kembali ke warna awal
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Gagal menyalin:', err);
+                    alert("Gagal menyalin kata sandi. Silakan blok tulisan dan salin secara manual.");
+                });
+            }
+        }
+
+        // Open Wi-Fi Settings Function
+        function openWifiSettings() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            if (/android/i.test(ua)) {
+                // Untuk HP Android
+                window.location.href = "intent:#Intent;action=android.settings.WIFI_SETTINGS;end";
+            } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+                // Untuk iPhone/iOS
+                window.location.href = "App-Prefs:root=WIFI";
+            } else {
+                alert("Fitur buka pengaturan otomatis hanya tersedia di HP Android dan iPhone.");
             }
         }
     </script>

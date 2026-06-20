@@ -201,8 +201,13 @@
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
-                // Untuk Android: Buka kamera bawaan yang biasanya mendukung scan QR / Lens
-                window.location.href = "intent:#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end";
+                // Mencoba membuka Google Lens secara spesifik terlebih dahulu
+                window.location.href = "intent://#Intent;action=android.intent.action.MAIN;package=com.google.android.googlequicksearchbox;component=com.google.android.apps.search.lens.LensActivity;end";
+                
+                // Jika Google Lens tidak terbuka (silent fail), fallback ke Kamera bawaan setelah 1 detik
+                setTimeout(() => {
+                    window.location.href = "intent://#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end";
+                }, 800);
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
                 alert("Gunakan Control Center pada iPhone Anda (usap dari atas ke bawah) untuk membuka Scanner QR bawaan.");
             } else {

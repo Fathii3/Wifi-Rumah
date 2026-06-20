@@ -66,8 +66,9 @@ function startSpeedTest() {
 function testDownloadSpeed() {
     const btn = document.getElementById('start-speed-btn');
     
-    // Endpoint pengujian unduh (Payload 15MB)
-    const downloadUrl = "https://speed.cloudflare.com/__down?bytes=15000000&nocache=" + Math.random();
+    // Perbesar ukuran payload (50MB) agar tes tidak selesai secara instan di jaringan cepat
+    // Sehingga animasi real-time punya waktu untuk berjalan
+    const downloadUrl = "https://speed.cloudflare.com/__down?bytes=50000000&nocache=" + Math.random();
     const startTime = Date.now();
     
     const xhr = new XMLHttpRequest();
@@ -76,49 +77,68 @@ function testDownloadSpeed() {
 
     let lastLoaded = 0;
     let lastTime = startTime;
+    let testTimeout = null;
 
     xhr.onprogress = function(event) {
-        if (event.lengthComputable) {
-            const currentTime = Date.now();
-            const timeDiff = (currentTime - lastTime) / 1000;
-            // Kalkulasi real-time per rentang 200ms
-            if (timeDiff > 0.2) {
-                const bytesDiff = event.loaded - lastLoaded;
+        const currentTime = Date.now();
+        const timeDiff = (currentTime - lastTime) / 1000;
+        
+        // Evaluasi pergerakan kecepatan setiap 100ms
+        if (timeDiff >= 0.1) {
+            const bytesDiff = event.loaded - lastLoaded;
+            if (bytesDiff > 0) {
                 const bps = (bytesDiff * 8) / timeDiff;
                 targetSpeed = bps / 1024 / 1024;
-                
-                lastLoaded = event.loaded;
-                lastTime = currentTime;
             }
+            
+            lastLoaded = event.loaded;
+            lastTime = currentTime;
         }
     };
 
-    xhr.onload = function() {
-        finishSpeedTest(xhr.response.size);
+    xhr.onload = function(event) {
+        finishSpeedTest(event.loaded);
     };
 
     xhr.onerror = function() {
-        targetSpeed = 0;
-        isTesting = false;
-        clearTimeout(pingTimeoutId);
-        resetBtn();
-        document.getElementById('speed-result').innerHTML = `Error <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
+        finishSpeedTest(lastLoaded, true);
     };
     
-    function finishSpeedTest(finalSize) {
+    // Paksa tes selesai dalam 6 detik untuk mencegah tes berjalan terlalu lama
+    testTimeout = setTimeout(() => {
+        if (isTesting) {
+            xhr.abort(); // Berhenti mengunduh
+            finishSpeedTest(lastLoaded);
+        }
+    }, 6000);
+    
+    function finishSpeedTest(finalBytes, isError = false) {
+        clearTimeout(testTimeout);
+        
+        if (isError && finalBytes === 0) {
+            targetSpeed = 0;
+            isTesting = false;
+            clearTimeout(pingTimeoutId);
+            resetBtn();
+            document.getElementById('speed-result').innerHTML = `Error <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
+            return;
+        }
+
         const currentTime = Date.now();
         const durationInSeconds = (currentTime - startTime) / 1000;
-        const sizeInBits = finalSize * 8;
-        // Kecepatan akhir (rata-rata final)
-        targetSpeed = sizeInBits / durationInSeconds / 1024 / 1024;
+        const sizeInBits = finalBytes * 8;
         
-        // Beri waktu 500ms untuk mencapai angka final
+        // Kecepatan akhir rata-rata agar hasil lebih konklusif
+        const finalSpeed = sizeInBits / durationInSeconds / 1024 / 1024;
+        targetSpeed = finalSpeed;
+        
+        // Beri waktu sejenak (500ms) untuk animasi mendarat ke angka akhir sebelum dimatikan
         setTimeout(() => {
             isTesting = false;
             clearTimeout(pingTimeoutId);
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
-            document.getElementById('speed-result').innerHTML = `${targetSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
+            document.getElementById('speed-result').innerHTML = `${finalSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
             resetBtn();
         }, 500);
     }

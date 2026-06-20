@@ -85,6 +85,15 @@
         </div>
     </div>
 
+    <!-- Glass Scanner Overlay -->
+    <div id="scanner-overlay" class="glass-popup-overlay">
+        <div class="glass-popup-box" style="max-width: 400px; padding: 20px;">
+            <h3 class="popup-title">Pindai QR Code</h3>
+            <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.5);"></div>
+            <button class="popup-close-btn" onclick="closeScanner()">Tutup Scanner</button>
+        </div>
+    </div>
+
     <!-- Load config and logic -->
     <script src="config.js"></script>
     <script>
@@ -229,22 +238,19 @@
             }
         }
 
-        // Open Scanner Function
+        // Open Scanner Function (Google Lens via Google App Utama)
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
-                // Penggunaan 'intent:#' (tanpa //) mencegah Chrome melakukan redirect otomatis ke PlayStore.
-                // Jika aplikasi ada, ia akan terbuka. Jika tidak, ia akan diam (silent fail).
-                window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.ar.lens;end";
-                
-                // Jika gagal membuka Lens (karena format intent beda tiap HP), fallback ke Kamera Bawaan
-                setTimeout(() => {
-                    if (document.visibilityState === 'visible') {
-                        window.location.href = "intent:#Intent;action=android.media.action.IMAGE_CAPTURE;end";
-                    }
-                }, 800);
+                // Trik terbaik: Membuka link 'lens.google.com' dan secara spesifik memerintahkan OS
+                // untuk membukanya menggunakan Aplikasi Google bawaan (googlequicksearchbox).
+                // Jika gagal, ia hanya akan membuka situs lens.google.com di browser, 
+                // sehingga 100% MENCEGAH lari ke Play Store.
+                const fallbackUrl = encodeURIComponent("https://lens.google.com/");
+                window.location.href = `intent://lens.google.com/#Intent;scheme=https;package=com.google.android.googlequicksearchbox;S.browser_fallback_url=${fallbackUrl};end`;
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-                showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
+                // Di iPhone, arahkan langsung ke situs web Google Lens
+                window.location.href = "https://lens.google.com/";
             } else {
                 showGlassPopup("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.", "Tidak Didukung");
             }

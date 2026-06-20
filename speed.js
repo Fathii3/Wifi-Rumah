@@ -4,30 +4,48 @@ let isTesting = false;
 let animationFrameId = null;
 let currentDisplayedSpeed = 0;
 let targetSpeed = 0;
+let pingTimeoutId = null;
 
 function animateSpeed() {
-    // Smoothly interpolate between current displayed speed and the real target speed
+    // Interpolasi halus
     if (Math.abs(currentDisplayedSpeed - targetSpeed) > 0.1) {
-        // Move towards target speed per frame for a smooth "web2" speedometer effect
         currentDisplayedSpeed += (targetSpeed - currentDisplayedSpeed) * 0.1;
-        const speedResult = document.getElementById('speed-result');
-        speedResult.innerHTML = `${currentDisplayedSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
-        animationFrameId = requestAnimationFrame(animateSpeed);
     } else {
-        currentDisplayedSpeed = targetSpeed;
-        document.getElementById('speed-result').innerHTML = `${currentDisplayedSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
-        animationFrameId = requestAnimationFrame(animateSpeed);
+        // Tambahkan efek getaran halus (jitter) jika sedang tes
+        if (isTesting && targetSpeed > 0) {
+            currentDisplayedSpeed = targetSpeed + (Math.random() * 0.2 - 0.1);
+        } else {
+            currentDisplayedSpeed = targetSpeed;
+        }
     }
+    
+    if (currentDisplayedSpeed < 0) currentDisplayedSpeed = 0;
+
+    document.getElementById('speed-result').innerHTML = `${currentDisplayedSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
+    animationFrameId = requestAnimationFrame(animateSpeed);
+}
+
+function startPingLoop() {
+    if (!isTesting) return;
+    const pingStart = Date.now();
+    fetch('https://www.cloudflare.com/cdn-cgi/trace', { cache: 'no-store', mode: 'no-cors' })
+        .then(() => {
+            if (!isTesting) return;
+            const pingTime = Date.now() - pingStart;
+            document.getElementById('ping-result').innerHTML = `Ping: ${pingTime} ms`;
+            pingTimeoutId = setTimeout(startPingLoop, 500); // Cek ping setiap 500ms
+        })
+        .catch(() => {
+            if (!isTesting) return;
+            pingTimeoutId = setTimeout(startPingLoop, 500);
+        });
 }
 
 function startSpeedTest() {
     if (isTesting) return;
     isTesting = true;
 
-    const speedResult = document.getElementById('speed-result');
-    const pingResult = document.getElementById('ping-result');
     const btn = document.getElementById('start-speed-btn');
-
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-anim"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.2l-5.67-5.67"/></svg> Menguji...';
     
     targetSpeed = 0;
@@ -36,26 +54,19 @@ function startSpeedTest() {
         animationFrameId = requestAnimationFrame(animateSpeed);
     }
 
-    pingResult.innerHTML = 'Ping: Menguji...';
+    document.getElementById('ping-result').innerHTML = 'Ping: Menguji...';
 
-    // Tahap 1: Ping (Latensi)
-    const pingStart = Date.now();
-    fetch('https://www.cloudflare.com/cdn-cgi/trace', { cache: 'no-store' })
-        .then(response => {
-            const pingTime = Date.now() - pingStart;
-            pingResult.innerHTML = `Ping: ${pingTime} ms`;
-            testDownloadSpeed();
-        })
-        .catch(err => {
-            pingResult.innerHTML = `Ping: Gagal`;
-            testDownloadSpeed();
-        });
+    // Mulai loop ping real-time
+    startPingLoop();
+    
+    // Mulai tes download langsung
+    testDownloadSpeed();
 }
 
 function testDownloadSpeed() {
     const btn = document.getElementById('start-speed-btn');
     
-    // Endpoint pengujian unduh (Payload 15MB dari CDN global untuk speed test)
+    // Endpoint pengujian unduh (Payload 15MB)
     const downloadUrl = "https://speed.cloudflare.com/__down?bytes=15000000&nocache=" + Math.random();
     const startTime = Date.now();
     
@@ -63,15 +74,21 @@ function testDownloadSpeed() {
     xhr.open("GET", downloadUrl, true);
     xhr.responseType = "blob";
 
+    let lastLoaded = 0;
+    let lastTime = startTime;
+
     xhr.onprogress = function(event) {
         if (event.lengthComputable) {
             const currentTime = Date.now();
-            const durationInSeconds = (currentTime - startTime) / 1000;
-            if (durationInSeconds > 0.1) {
-                const loadedBits = event.loaded * 8;
-                const bps = loadedBits / durationInSeconds;
-                // Update target speed, animation loop will catch up
+            const timeDiff = (currentTime - lastTime) / 1000;
+            // Kalkulasi real-time per rentang 200ms
+            if (timeDiff > 0.2) {
+                const bytesDiff = event.loaded - lastLoaded;
+                const bps = (bytesDiff * 8) / timeDiff;
                 targetSpeed = bps / 1024 / 1024;
+                
+                lastLoaded = event.loaded;
+                lastTime = currentTime;
             }
         }
     };
@@ -83,6 +100,7 @@ function testDownloadSpeed() {
     xhr.onerror = function() {
         targetSpeed = 0;
         isTesting = false;
+        clearTimeout(pingTimeoutId);
         resetBtn();
         document.getElementById('speed-result').innerHTML = `Error <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
     };
@@ -91,14 +109,16 @@ function testDownloadSpeed() {
         const currentTime = Date.now();
         const durationInSeconds = (currentTime - startTime) / 1000;
         const sizeInBits = finalSize * 8;
+        // Kecepatan akhir (rata-rata final)
         targetSpeed = sizeInBits / durationInSeconds / 1024 / 1024;
         
-        // Beri waktu 500ms agar animasi mencapai angka final lalu hentikan
+        // Beri waktu 500ms untuk mencapai angka final
         setTimeout(() => {
+            isTesting = false;
+            clearTimeout(pingTimeoutId);
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
             document.getElementById('speed-result').innerHTML = `${targetSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
-            isTesting = false;
             resetBtn();
         }, 500);
     }

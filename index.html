@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Connect</title>
+    <!-- Modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Load qrcode.js library from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- Background animation elements -->
+    <div class="blob shape-1"></div>
+    <div class="blob shape-2"></div>
+    <div class="blob shape-3"></div>
+
+    <div class="glass-card">
+        <div class="header">
+            <h1 class="title">Wi-Fi Connect</h1>
+            <p class="subtitle">Pilih metode untuk terhubung</p>
+        </div>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btn-qr" onclick="showQR()">QR Code</button>
+            <button class="toggle-btn" id="btn-pwd" onclick="showPassword()">Kata Sandi</button>
+        </div>
+        
+        <!-- Tab QR -->
+        <div id="tab-qr" class="tab-content active">
+            <div class="qr-container">
+                <div id="qrcode"></div>
+            </div>
+            <button class="download-btn" onclick="downloadQR()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Unduh QR
+            </button>
+        </div>
+
+        <!-- Tab Password -->
+        <div id="tab-pwd" class="tab-content">
+            <div class="password-box">
+                <div class="pwd-label">Kata Sandi Wi-Fi:</div>
+                <div class="pwd-value" id="wifi-password-display">Loading...</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <span id="wifi-name-display">Loading...</span>
+        </div>
+    </div>
+    
+    <!-- Load config and logic -->
+    <script src="config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof wifiConfig !== 'undefined') {
+                const { ssid, password, encryption } = wifiConfig;
+                
+                // Display SSID on UI
+                document.getElementById('wifi-name-display').innerText = `📶 ${ssid}`;
+                // Display Password on UI
+                document.getElementById('wifi-password-display').innerText = password;
+
+                // Wi-Fi string format: WIFI:T:<encryption>;S:<ssid>;P:<password>;;
+                const wifiString = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+                
+                // Generate QR Code with custom styling
+                new QRCode(document.getElementById("qrcode"), {
+                    text: wifiString,
+                    width: 220,
+                    height: 220,
+                    colorDark : "#1a1a1a",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            } else {
+                console.error('Konfigurasi Wi-Fi tidak ditemukan. Pastikan config.js dimuat dengan benar.');
+                document.getElementById('qrcode').innerHTML = '<p style="color:#ff6b6b; font-weight:bold;">Error: config.js missing.</p>';
+            }
+        });
+
+        // Toggle Functions
+        function showQR() {
+            document.getElementById('tab-qr').classList.add('active');
+            document.getElementById('tab-pwd').classList.remove('active');
+            document.getElementById('btn-qr').classList.add('active');
+            document.getElementById('btn-pwd').classList.remove('active');
+        }
+
+        function showPassword() {
+            document.getElementById('tab-pwd').classList.add('active');
+            document.getElementById('tab-qr').classList.remove('active');
+            document.getElementById('btn-pwd').classList.add('active');
+            document.getElementById('btn-qr').classList.remove('active');
+        }
+
+        // Download Function
+        function downloadQR() {
+            // qrcode.js adds a canvas element
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'Wi-Fi_QR_Code.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } else {
+                // Fallback for browsers returning an img instead
+                const img = document.querySelector('#qrcode img');
+                if (img && img.src) {
+                    const link = document.createElement('a');
+                    link.download = 'Wi-Fi_QR_Code.png';
+                    link.href = img.src;
+                    link.click();
+                } else {
+                    alert("Gagal mengunduh QR Code. Coba muat ulang halaman.");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

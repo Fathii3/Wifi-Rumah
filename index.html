@@ -25,15 +25,19 @@
     <div class="glass-particle p6"></div>
 
     <div class="glass-card">
-        <div class="header">
-            <h1 class="title">Wi-Fi Connect</h1>
-            <p class="subtitle">Pilih metode untuk terhubung</p>
+        <div class="header" style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 25px;">
+            <div style="text-align: center;">
+                <h1 class="title" style="margin-bottom: 5px;">Wi-Fi Connect</h1>
+                <p class="subtitle">Pilih metode untuk terhubung</p>
+            </div>
+            <a href="#" onclick="showTab('speed')" title="Speed Test" style="position: absolute; right: 0; top: 5px; color: #ffffff; opacity: 0.7; transition: opacity 0.3s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </a>
         </div>
 
-        <div class="toggle-container">
+        <div class="toggle-container" id="main-toggles">
             <button class="toggle-btn active" id="btn-qr" onclick="showTab('qr')">QR Code</button>
             <button class="toggle-btn" id="btn-pwd" onclick="showTab('pwd')">Kata Sandi</button>
-            <button class="toggle-btn" id="btn-speed" onclick="showTab('speed')">Kecepatan</button>
         </div>
         
         <!-- Tab QR -->
@@ -78,10 +82,14 @@
                 <div class="speed-value" id="speed-result">0 <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span></div>
                 <div class="ping-value" id="ping-result">Ping: -- ms</div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center;">
-                <button class="download-btn btn-glass-success" onclick="startSpeedTest()" id="start-speed-btn" style="margin-bottom: 20px; width: 100%; max-width: 200px; justify-content: center;">
+            <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-bottom: 20px;">
+                <button class="download-btn btn-glass-success" onclick="startSpeedTest()" id="start-speed-btn" style="flex: 1; justify-content: center; margin-bottom: 0;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     Mulai Tes
+                </button>
+                <button class="download-btn btn-glass-danger" onclick="showTab('qr')" style="flex: 1; justify-content: center; margin-bottom: 0;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Kembali
                 </button>
             </div>
         </div>
@@ -125,6 +133,7 @@
 
     <!-- Load config and logic -->
     <script src="config.js"></script>
+    <script src="speed.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof wifiConfig !== 'undefined') {
@@ -213,7 +222,15 @@
             
             // Show selected tab
             document.getElementById('tab-' + tabId).classList.add('active');
-            document.getElementById('btn-' + tabId).classList.add('active');
+            
+            // Handle toggle buttons visibility
+            const toggles = document.getElementById('main-toggles');
+            if (tabId === 'speed') {
+                toggles.style.display = 'none';
+            } else {
+                toggles.style.display = 'flex';
+                document.getElementById('btn-' + tabId).classList.add('active');
+            }
         }
 
         // Download Function
@@ -321,88 +338,6 @@
                     window.location.href = "https://www.google.com";
                 }, 2500);
             }
-        }
-
-        // Speed Test Function
-        let isTesting = false;
-
-        function startSpeedTest() {
-            if (isTesting) return;
-            isTesting = true;
-
-            const speedResult = document.getElementById('speed-result');
-            const pingResult = document.getElementById('ping-result');
-            const btn = document.getElementById('start-speed-btn');
-
-            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-anim"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.2l-5.67-5.67"/></svg> Menguji...';
-            speedResult.innerHTML = '0 <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>';
-            pingResult.innerHTML = 'Ping: Menguji...';
-
-            // Tahap 1: Ping (Latensi)
-            const pingStart = Date.now();
-            fetch('https://www.cloudflare.com/cdn-cgi/trace', { cache: 'no-store' })
-                .then(response => {
-                    const pingTime = Date.now() - pingStart;
-                    pingResult.innerHTML = `Ping: ${pingTime} ms`;
-                    testDownloadSpeed();
-                })
-                .catch(err => {
-                    pingResult.innerHTML = `Ping: Gagal`;
-                    testDownloadSpeed();
-                });
-        }
-
-        function testDownloadSpeed() {
-            const speedResult = document.getElementById('speed-result');
-            const btn = document.getElementById('start-speed-btn');
-            
-            // Endpoint pengujian unduh (Payload 15MB dari CDN global untuk speed test)
-            const downloadUrl = "https://speed.cloudflare.com/__down?bytes=15000000&nocache=" + Math.random();
-            const startTime = Date.now();
-            
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", downloadUrl, true);
-            xhr.responseType = "blob";
-
-            xhr.onprogress = function(event) {
-                if (event.lengthComputable) {
-                    const currentTime = Date.now();
-                    const durationInSeconds = (currentTime - startTime) / 1000;
-                    if (durationInSeconds > 0.1) {
-                        const loadedBits = event.loaded * 8;
-                        const bps = loadedBits / durationInSeconds;
-                        const mbps = (bps / 1024 / 1024).toFixed(1);
-                        speedResult.innerHTML = `${mbps} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
-                    }
-                }
-            };
-
-            xhr.onload = function() {
-                finishSpeedTest(xhr.response.size);
-            };
-
-            xhr.onerror = function() {
-                speedResult.innerHTML = `Error <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
-                isTesting = false;
-                resetBtn();
-            };
-            
-            function finishSpeedTest(finalSize) {
-                const currentTime = Date.now();
-                const durationInSeconds = (currentTime - startTime) / 1000;
-                const sizeInBits = finalSize * 8;
-                const mbps = (sizeInBits / durationInSeconds / 1024 / 1024).toFixed(1);
-                
-                speedResult.innerHTML = `${mbps} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
-                isTesting = false;
-                resetBtn();
-            }
-
-            function resetBtn() {
-                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.2l-5.67-5.67"/></svg> Ulangi Tes';
-            }
-
-            xhr.send();
         }
     </script>
 </body>

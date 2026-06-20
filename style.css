@@ -329,3 +329,14 @@ body::after {
     color: #ff6b6b;
     font-weight: bold;
 }
+
+.watermark {
+    width: 100%;
+    text-align: right;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    letter-spacing: 0.5px;
+    margin-top: 15px;
+    padding-right: 5px;
+}

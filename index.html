@@ -76,6 +76,15 @@
         <div class="watermark">by: family pak harun</div>
     </div>
     
+    <!-- Glass Popup Notification -->
+    <div id="glass-popup" class="glass-popup-overlay">
+        <div class="glass-popup-box">
+            <h3 class="popup-title" id="popup-title-text">Pemberitahuan</h3>
+            <p class="popup-message" id="popup-message-text">Pesan</p>
+            <button class="popup-close-btn" onclick="closePopup()">Tutup</button>
+        </div>
+    </div>
+
     <!-- Load config and logic -->
     <script src="config.js"></script>
     <script>
@@ -112,6 +121,17 @@
                 document.getElementById('qrcode').innerHTML = '<p class="error-message">Error: config.js missing.</p>';
             }
         });
+
+        // Popup Functions
+        function showGlassPopup(message, title = "Pemberitahuan") {
+            document.getElementById('popup-title-text').innerText = title;
+            document.getElementById('popup-message-text').innerText = message;
+            document.getElementById('glass-popup').classList.add('active');
+        }
+
+        function closePopup() {
+            document.getElementById('glass-popup').classList.remove('active');
+        }
 
         // Toggle Functions
         function showQR() {
@@ -159,7 +179,7 @@
                     link.href = img.src;
                     link.click();
                 } else {
-                    alert("Gagal mengunduh QR Code. Coba muat ulang halaman.");
+                    showGlassPopup("Gagal mengunduh QR Code. Coba muat ulang halaman.", "Error");
                 }
             }
         }
@@ -178,7 +198,7 @@
                     }, 2000);
                 }).catch(err => {
                     console.error('Gagal menyalin:', err);
-                    alert("Gagal menyalin kata sandi. Silakan blok tulisan dan salin secara manual.");
+                    showGlassPopup("Gagal menyalin kata sandi. Silakan blok tulisan dan salin secara manual.", "Gagal");
                 });
             }
         }
@@ -188,30 +208,44 @@
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
                 // Untuk HP Android
-                window.location.href = "intent:#Intent;action=android.settings.WIFI_SETTINGS;end";
+                window.location.href = "intent://#Intent;action=android.settings.WIFI_SETTINGS;end";
+                
+                setTimeout(() => {
+                    if (document.visibilityState === 'visible') {
+                        showGlassPopup("Tidak dapat membuka pengaturan Wi-Fi secara otomatis. Silakan buka Pengaturan HP Anda secara manual.", "Aksi Gagal");
+                    }
+                }, 1500);
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
                 // Untuk iPhone/iOS
                 window.location.href = "App-Prefs:root=WIFI";
+                
+                setTimeout(() => {
+                    if (document.visibilityState === 'visible') {
+                        showGlassPopup("Tidak dapat membuka pengaturan Wi-Fi secara otomatis. Silakan buka aplikasi Pengaturan secara manual.", "Aksi Gagal");
+                    }
+                }, 1500);
             } else {
-                alert("Fitur buka pengaturan otomatis hanya tersedia di HP Android dan iPhone.");
+                showGlassPopup("Fitur buka pengaturan otomatis hanya tersedia di HP Android dan iPhone.", "Tidak Didukung");
             }
         }
 
-        // Open Scanner Function (Google Lens / Camera)
+        // Open Scanner Function (Camera)
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
-                // Mencoba membuka Google Lens secara spesifik terlebih dahulu
-                window.location.href = "intent://#Intent;action=android.intent.action.MAIN;package=com.google.android.googlequicksearchbox;component=com.google.android.apps.search.lens.LensActivity;end";
+                // Buka kamera bawaan
+                window.location.href = "intent://#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end";
                 
-                // Jika Google Lens tidak terbuka (silent fail), fallback ke Kamera bawaan setelah 1 detik
+                // Deteksi jika gagal beralih ke app kamera (halaman masih terlihat setelah 1.5 detik)
                 setTimeout(() => {
-                    window.location.href = "intent://#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end";
-                }, 800);
+                    if (document.visibilityState === 'visible') {
+                        showGlassPopup("Gagal membuka kamera otomatis. Silakan buka aplikasi Kamera/Scanner di HP Anda secara manual.", "Aksi Gagal");
+                    }
+                }, 1500);
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-                alert("Gunakan Control Center pada iPhone Anda (usap dari atas ke bawah) untuk membuka Scanner QR bawaan.");
+                showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
             } else {
-                alert("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.");
+                showGlassPopup("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.", "Tidak Didukung");
             }
         }
     </script>

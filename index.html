@@ -238,19 +238,19 @@
             }
         }
 
-        // Open Scanner Function (Google Lens via Google App Utama)
+        // Open Scanner Function (Google App Utama)
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
-                // Trik terbaik: Membuka link 'lens.google.com' dan secara spesifik memerintahkan OS
-                // untuk membukanya menggunakan Aplikasi Google bawaan (googlequicksearchbox).
-                // Jika gagal, ia hanya akan membuka situs lens.google.com di browser, 
-                // sehingga 100% MENCEGAH lari ke Play Store.
-                const fallbackUrl = encodeURIComponent("https://lens.google.com/");
-                window.location.href = `intent://lens.google.com/#Intent;scheme=https;package=com.google.android.googlequicksearchbox;S.browser_fallback_url=${fallbackUrl};end`;
+                // Menampilkan instruksi popup
+                showGlassPopup("Sistem membatasi akses langsung ke kamera.\n\nMembuka aplikasi Google... Silakan ketuk ikon Kamera (Lens) di sebelah kanan kolom pencarian.", "Info Google Lens");
+                
+                // Beri waktu 3 detik bagi user membaca, lalu buka halaman utama Aplikasi Google (bukan Chrome)
+                setTimeout(() => {
+                    window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.googlequicksearchbox;end";
+                }, 3000);
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-                // Di iPhone, arahkan langsung ke situs web Google Lens
-                window.location.href = "https://lens.google.com/";
+                showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
             } else {
                 showGlassPopup("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.", "Tidak Didukung");
             }

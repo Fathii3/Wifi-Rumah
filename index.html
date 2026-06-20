@@ -229,17 +229,14 @@
             }
         }
 
-        // Open Scanner Function (Google Lens via Google App)
+        // Open Scanner Function (Standalone Google Lens)
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
-                // Tampilkan pesan instruksi karena Google memblokir akses langsung ke internal Lens dari web
-                showGlassPopup("Sistem Android membatasi akses langsung ke kamera Google Lens dari web.\n\nSebentar lagi aplikasi Google akan terbuka. Silakan ketuk ikon Kamera (Lens) di sebelah kanan kolom pencarian untuk memindai.", "Info Google Lens");
-                
-                // Beri waktu 3 detik bagi user untuk membaca pesan, lalu buka aplikasi Google utama
-                setTimeout(() => {
-                    window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.googlequicksearchbox;end";
-                }, 3500);
+                // Secara logika Android Chrome: 
+                // Jika aplikasi com.google.ar.lens terinstal, ia akan otomatis terbuka.
+                // Jika tidak terinstal, Chrome otomatis melempar ke Play Store untuk mendownload Google Lens.
+                window.location.href = "intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.ar.lens;end";
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
                 showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
             } else {

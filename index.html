@@ -76,8 +76,7 @@
                     correctLevel : QRCode.CorrectLevel.H
                 });
             } else {
-                console.error('Konfigurasi Wi-Fi tidak ditemukan. Pastikan config.js dimuat dengan benar.');
-                document.getElementById('qrcode').innerHTML = '<p style="color:#ff6b6b; font-weight:bold;">Error: config.js missing.</p>';
+                document.getElementById('qrcode').innerHTML = '<p class="error-message">Error: config.js missing.</p>';
             }
         });
 
@@ -98,12 +97,25 @@
 
         // Download Function
         function downloadQR() {
-            // qrcode.js adds a canvas element
-            const canvas = document.querySelector('#qrcode canvas');
-            if (canvas) {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                // Buat canvas baru untuk menambahkan latar belakang putih (padding/quiet zone)
+                const padding = 20;
+                const newCanvas = document.createElement('canvas');
+                newCanvas.width = qrCanvas.width + (padding * 2);
+                newCanvas.height = qrCanvas.height + (padding * 2);
+                
+                const ctx = newCanvas.getContext('2d');
+                // Isi dengan latar belakang putih
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+                
+                // Gambar QR Code di tengah canvas baru
+                ctx.drawImage(qrCanvas, padding, padding);
+
                 const link = document.createElement('a');
                 link.download = 'Wi-Fi_QR_Code.png';
-                link.href = canvas.toDataURL("image/png");
+                link.href = newCanvas.toDataURL("image/png");
                 link.click();
             } else {
                 // Fallback for browsers returning an img instead

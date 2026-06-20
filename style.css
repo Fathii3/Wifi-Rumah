@@ -259,3 +259,8 @@ body {
 .footer:hover {
     background: rgba(255, 255, 255, 0.15);
 }
+
+.error-message {
+    color: #ff6b6b;
+    font-weight: bold;
+}

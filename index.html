@@ -238,34 +238,16 @@
             }
         }
 
-        // Open Scanner Function (Pasti Buka Aplikasi Google)
+        // Open Scanner Function (Direct Web Link)
         function openScanner() {
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            if (/android/i.test(ua)) {
-                // Tampilkan pesan panduan
-                showGlassPopup("Aplikasi Google sedang dibuka...\n\nSilakan ketuk ikon Kamera (Lens) di kolom pencarian untuk memindai.", "Info Google Lens");
-                
-                // Trik Super Ampuh: Menghilangkan nama 'package' sepenuhnya!
-                // Alih-alih memanggil nama paket (yang sering diblokir HP Samsung dan dilarikan ke PlayStore),
-                // kita memanggil perintah sistem murni 'WEB_SEARCH'. 
-                // Sistem Android akan otomatis meresponsnya dengan membuka Aplikasi Google!
-                setTimeout(() => {
-                    window.location.href = "intent:#Intent;action=android.intent.action.WEB_SEARCH;S.query=Google+Lens;end";
-                }, 800);
-            } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-                showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
-            } else {
-                showGlassPopup("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.", "Tidak Didukung");
-            }
+            // Tampilkan pesan panduan singkat
+            showGlassPopup("Membuka Google...\n\nSilakan ketuk ikon Kamera (Lens) di kolom pencarian untuk memindai gambar QR.", "Info Google Lens");
+            
+            // Jeda 2 detik agar pesan terbaca, lalu alihkan ke web Google biasa
+            setTimeout(() => {
+                window.location.href = "https://www.google.com";
+            }, 2000);
         }
-
-        // Tangkap event jika sistem benar-benar gagal membuka Aplikasi Google (fallback)
-        window.addEventListener('hashchange', () => {
-            if (window.location.hash === '#lens-failed') {
-                history.replaceState(null, null, ' '); // Bersihkan history URL
-                showGlassPopup("Sistem HP Anda tidak mengizinkan pemanggilan aplikasi otomatis. Silakan buka aplikasi Google atau Kamera Anda secara manual.", "Akses Ditolak");
-            }
-        });
     </script>
 </body>
 </html>

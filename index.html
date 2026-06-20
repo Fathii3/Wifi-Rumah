@@ -238,23 +238,35 @@
             }
         }
 
-        // Open Scanner Function (Google App Utama)
+        // Open Scanner Function (Instan ke Google App)
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
-                // Menampilkan instruksi popup
-                showGlassPopup("Sistem membatasi akses langsung ke kamera.\n\nMembuka aplikasi Google... Silakan ketuk ikon Kamera (Lens) di sebelah kanan kolom pencarian.", "Info Google Lens");
+                // Tampilkan pesan panduan
+                showGlassPopup("Aplikasi Google sedang dibuka...\n\nSilakan ketuk ikon Kamera (Lens) di kolom pencarian untuk memindai.", "Info Google Lens");
                 
-                // Beri waktu 3 detik bagi user membaca, lalu buka halaman utama Aplikasi Google (bukan Chrome)
-                setTimeout(() => {
-                    window.location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.googlequicksearchbox;end";
-                }, 3000);
+                // Gunakan URL saat ini ditambah #lens-failed sebagai fallback jika HP gagal/menolak membuka aplikasi
+                const currentUrl = window.location.href.split('#')[0];
+                const fallbackUrl = encodeURIComponent(currentUrl + '#lens-failed');
+                
+                // Langsung eksekusi tanpa jeda (1 kali tombol)
+                // Menggunakan skema HTTPS intent spesifik ke Google App.
+                // Jika gagal di Samsung atau merk lain, fallback BUKAN ke Play Store, melainkan kembali ke halaman ini (memunculkan error).
+                window.location.href = `intent://google.com/#Intent;package=com.google.android.googlequicksearchbox;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
                 showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
             } else {
                 showGlassPopup("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.", "Tidak Didukung");
             }
         }
+
+        // Tangkap event jika sistem benar-benar gagal membuka Aplikasi Google (fallback)
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash === '#lens-failed') {
+                history.replaceState(null, null, ' '); // Bersihkan history URL
+                showGlassPopup("Sistem HP Anda tidak mengizinkan pemanggilan aplikasi otomatis. Silakan buka aplikasi Google atau Kamera Anda secara manual.", "Akses Ditolak");
+            }
+        });
     </script>
 </body>
 </html>

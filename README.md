@@ -4,10 +4,27 @@ Website portofolio/utilitas pribadi dengan tampilan antarmuka *Glassmorphism* mo
 
 ## 🔒 Akses Panel Admin Router Wi-Fi
 
-Gunakan kredensial di bawah ini jika suatu saat Anda perlu masuk ke pengaturan mesin/router Wi-Fi (misalnya untuk memblokir perangkat, membatasi kecepatan, atau mengganti kata sandi Wi-Fi utama):
+Gunakan informasi di bawah ini jika suatu saat Anda perlu masuk ke pengaturan mesin/router Wi-Fi (misalnya untuk memblokir perangkat, membatasi kecepatan, atau mengganti kata sandi Wi-Fi utama).
 
-- **Username:** `admin`
-- **Password:** `Rumah`
+> [!WARNING]
+> **Syarat Akses:** Anda **HARUS** sudah terhubung ke jaringan Wi-Fi rumah ini terlebih dahulu sebelum bisa membuka link portal admin di bawah. Jika tidak terhubung, link tidak akan bisa diakses.
+
+Berikut adalah link portal beserta kredensial login (dibuat dalam kotak agar mudah disalin/copy):
+
+**Link Portal:**
+```text
+http://192.168.1.1/admin/login.asp
+```
+
+**Username:**
+```text
+admin
+```
+
+**Password:**
+```text
+Rumah
+```
 
 > [!IMPORTANT]
 > **Keamanan Kredensial**

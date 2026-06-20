@@ -208,7 +208,7 @@
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
                 // Untuk HP Android
-                window.location.href = "intent://#Intent;action=android.settings.WIFI_SETTINGS;end";
+                window.location.href = "intent:#Intent;action=android.settings.WIFI_SETTINGS;end";
                 
                 setTimeout(() => {
                     if (document.visibilityState === 'visible') {
@@ -234,7 +234,7 @@
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
                 // Buka kamera bawaan
-                window.location.href = "intent://#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end";
+                window.location.href = "intent:#Intent;action=android.media.action.IMAGE_CAPTURE;end";
                 
                 // Deteksi jika gagal beralih ke app kamera (halaman masih terlihat setelah 1.5 detik)
                 setTimeout(() => {

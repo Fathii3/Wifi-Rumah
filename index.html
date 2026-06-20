@@ -40,10 +40,16 @@
             <div class="qr-container">
                 <div id="qrcode"></div>
             </div>
-            <button class="download-btn" onclick="downloadQR()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Unduh QR
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center;">
+                <button class="download-btn" onclick="downloadQR()" style="margin-bottom: 0; width: 100%; max-width: 200px; justify-content: center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Unduh QR
+                </button>
+                <button class="download-btn" onclick="openScanner()" style="margin-bottom: 20px; width: 100%; max-width: 200px; justify-content: center; background: rgba(0, 0, 0, 0.1);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><circle cx="12" cy="12" r="2"></circle></svg>
+                    Buka Scanner
+                </button>
+            </div>
         </div>
 
         <!-- Tab Password -->
@@ -99,7 +105,7 @@
                     width: 150,
                     height: 150,
                     colorDark : "#000000",
-                    colorLight : "transparent",
+                    colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
             } else {
@@ -188,6 +194,19 @@
                 window.location.href = "App-Prefs:root=WIFI";
             } else {
                 alert("Fitur buka pengaturan otomatis hanya tersedia di HP Android dan iPhone.");
+            }
+        }
+
+        // Open Scanner Function (Google Lens / Camera)
+        function openScanner() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            if (/android/i.test(ua)) {
+                // Untuk Android: Buka kamera bawaan yang biasanya mendukung scan QR / Lens
+                window.location.href = "intent:#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end";
+            } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+                alert("Gunakan Control Center pada iPhone Anda (usap dari atas ke bawah) untuk membuka Scanner QR bawaan.");
+            } else {
+                alert("Fitur buka scanner otomatis hanya tersedia di perangkat mobile.");
             }
         }
     </script>

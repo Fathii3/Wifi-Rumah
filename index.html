@@ -238,21 +238,20 @@
             }
         }
 
-        // Open Scanner Function (Instan ke Google App)
+        // Open Scanner Function (Pasti Buka Aplikasi Google)
         function openScanner() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             if (/android/i.test(ua)) {
                 // Tampilkan pesan panduan
                 showGlassPopup("Aplikasi Google sedang dibuka...\n\nSilakan ketuk ikon Kamera (Lens) di kolom pencarian untuk memindai.", "Info Google Lens");
                 
-                // Gunakan URL saat ini ditambah #lens-failed sebagai fallback jika HP gagal/menolak membuka aplikasi
-                const currentUrl = window.location.href.split('#')[0];
-                const fallbackUrl = encodeURIComponent(currentUrl + '#lens-failed');
-                
-                // Langsung eksekusi tanpa jeda (1 kali tombol)
-                // Menggunakan skema HTTPS intent spesifik ke Google App.
-                // Jika gagal di Samsung atau merk lain, fallback BUKAN ke Play Store, melainkan kembali ke halaman ini (memunculkan error).
-                window.location.href = `intent://google.com/#Intent;package=com.google.android.googlequicksearchbox;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
+                // Trik Super Ampuh: Menghilangkan nama 'package' sepenuhnya!
+                // Alih-alih memanggil nama paket (yang sering diblokir HP Samsung dan dilarikan ke PlayStore),
+                // kita memanggil perintah sistem murni 'WEB_SEARCH'. 
+                // Sistem Android akan otomatis meresponsnya dengan membuka Aplikasi Google!
+                setTimeout(() => {
+                    window.location.href = "intent:#Intent;action=android.intent.action.WEB_SEARCH;S.query=Google+Lens;end";
+                }, 800);
             } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
                 showGlassPopup("Gunakan Control Center pada iPhone Anda (usap dari sudut kanan atas) lalu pilih ikon QR Scanner.", "Petunjuk iOS");
             } else {

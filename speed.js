@@ -63,57 +63,62 @@ function startSpeedTest() {
     testDownloadSpeed();
 }
 
-function testDownloadSpeed() {
+async function testDownloadSpeed() {
     const btn = document.getElementById('start-speed-btn');
     
-    // Perbesar ukuran payload (50MB) agar tes tidak selesai secara instan di jaringan cepat
-    // Sehingga animasi real-time punya waktu untuk berjalan
+    // Perbesar ukuran payload (50MB)
     const downloadUrl = "https://speed.cloudflare.com/__down?bytes=50000000&nocache=" + Math.random();
     const startTime = Date.now();
     
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", downloadUrl, true);
-    xhr.responseType = "blob";
-
-    let lastLoaded = 0;
-    let lastTime = startTime;
+    let loaded = 0;
     let testTimeout = null;
+    let isAborted = false;
 
-    xhr.onprogress = function(event) {
-        const currentTime = Date.now();
-        const timeDiff = (currentTime - lastTime) / 1000;
-        
-        // Evaluasi pergerakan kecepatan setiap 100ms
-        if (timeDiff >= 0.1) {
-            const bytesDiff = event.loaded - lastLoaded;
-            if (bytesDiff > 0) {
-                const bps = (bytesDiff * 8) / timeDiff;
-                targetSpeed = bps / 1024 / 1024;
-            }
-            
-            lastLoaded = event.loaded;
-            lastTime = currentTime;
-        }
-    };
-
-    xhr.onload = function(event) {
-        finishSpeedTest(event.loaded);
-    };
-
-    xhr.onerror = function() {
-        finishSpeedTest(lastLoaded, true);
-    };
-    
     // Paksa tes selesai dalam 6 detik untuk mencegah tes berjalan terlalu lama
     testTimeout = setTimeout(() => {
         if (isTesting) {
-            xhr.abort(); // Berhenti mengunduh
-            finishSpeedTest(lastLoaded);
+            isAborted = true;
+            finishSpeedTest(loaded);
         }
     }, 6000);
+
+    try {
+        const response = await fetch(downloadUrl);
+        const reader = response.body.getReader();
+
+        // Loop streaming untuk membaca file per-bongkahan (chunk)
+        // Cara ini memastikan animasi UI tidak freeze karena await melepaskan thread
+        while (true) {
+            if (isAborted || !isTesting) {
+                reader.cancel();
+                break;
+            }
+            
+            const { done, value } = await reader.read();
+            
+            if (done) {
+                if (!isAborted) finishSpeedTest(loaded);
+                break;
+            }
+
+            loaded += value.length;
+            
+            const currentTime = Date.now();
+            const durationInSeconds = (currentTime - startTime) / 1000;
+            
+            // Kalkulasi kumulatif untuk pergerakan angka yang terus naik/mulus
+            if (durationInSeconds > 0.1) {
+                const bps = (loaded * 8) / durationInSeconds;
+                targetSpeed = bps / 1024 / 1024;
+            }
+        }
+    } catch (err) {
+        if (!isAborted) finishSpeedTest(loaded, true);
+    }
     
     function finishSpeedTest(finalBytes, isError = false) {
         clearTimeout(testTimeout);
+        isAborted = true;
         
         if (isError && finalBytes === 0) {
             targetSpeed = 0;
@@ -146,6 +151,4 @@ function testDownloadSpeed() {
     function resetBtn() {
         btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Ulangi Tes';
     }
-
-    xhr.send();
 }

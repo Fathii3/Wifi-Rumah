@@ -27,11 +27,11 @@ function animateSpeed() {
 
 function startPingLoop() {
     if (!isTesting) return;
-    const pingStart = Date.now();
+    const pingStart = performance.now();
     fetch('https://www.cloudflare.com/cdn-cgi/trace', { cache: 'no-store', mode: 'no-cors' })
         .then(() => {
             if (!isTesting) return;
-            const pingTime = Date.now() - pingStart;
+            const pingTime = Math.round(performance.now() - pingStart);
             document.getElementById('ping-result').innerHTML = `Ping: ${pingTime} ms`;
             pingTimeoutId = setTimeout(startPingLoop, 500); // Cek ping setiap 500ms
         })
@@ -68,11 +68,11 @@ async function testDownloadSpeed() {
     
     // Perbesar ukuran payload (50MB)
     const downloadUrl = "https://speed.cloudflare.com/__down?bytes=50000000&nocache=" + Math.random();
-    const startTime = Date.now();
     
     let loaded = 0;
     let testTimeout = null;
     let isAborted = false;
+    let streamStartTime = 0; // Waktu akan dimulai setelah koneksi tersambung
 
     // Paksa tes selesai dalam 6 detik untuk mencegah tes berjalan terlalu lama
     testTimeout = setTimeout(() => {
@@ -84,10 +84,11 @@ async function testDownloadSpeed() {
 
     try {
         const response = await fetch(downloadUrl);
+        // Koneksi berhasil tersambung (DNS, TCP, TLS selesai). Mulai perhitungan waktu MURNI unduhan.
+        streamStartTime = performance.now(); 
         const reader = response.body.getReader();
 
         // Loop streaming untuk membaca file per-bongkahan (chunk)
-        // Cara ini memastikan animasi UI tidak freeze karena await melepaskan thread
         while (true) {
             if (isAborted || !isTesting) {
                 reader.cancel();
@@ -103,13 +104,14 @@ async function testDownloadSpeed() {
 
             loaded += value.length;
             
-            const currentTime = Date.now();
-            const durationInSeconds = (currentTime - startTime) / 1000;
+            const currentTime = performance.now();
+            const durationInSeconds = (currentTime - streamStartTime) / 1000;
             
             // Kalkulasi kumulatif untuk pergerakan angka yang terus naik/mulus
             if (durationInSeconds > 0.1) {
                 const bps = (loaded * 8) / durationInSeconds;
-                targetSpeed = bps / 1024 / 1024;
+                // 1 Megabit = 1.000.000 bit (Standar telekomunikasi/ISP)
+                targetSpeed = bps / 1000000; 
             }
         }
     } catch (err) {
@@ -129,12 +131,13 @@ async function testDownloadSpeed() {
             return;
         }
 
-        const currentTime = Date.now();
-        const durationInSeconds = (currentTime - startTime) / 1000;
+        const currentTime = performance.now();
+        // Cegah division by zero jika gagal sebelum tersambung
+        const durationInSeconds = streamStartTime > 0 ? (currentTime - streamStartTime) / 1000 : 0.1; 
         const sizeInBits = finalBytes * 8;
         
-        // Kecepatan akhir rata-rata agar hasil lebih konklusif
-        const finalSpeed = sizeInBits / durationInSeconds / 1024 / 1024;
+        // Kecepatan akhir rata-rata (Menggunakan 1.000.000 bit)
+        const finalSpeed = sizeInBits / durationInSeconds / 1000000;
         targetSpeed = finalSpeed;
         
         // Beri waktu sejenak (500ms) untuk animasi mendarat ke angka akhir sebelum dimatikan

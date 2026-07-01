@@ -1,0 +1,27 @@
+{
+  "name": "wifi-rumah",
+  "version": "1.0.0",
+  "description": "Website portofolio/utilitas pribadi dengan tampilan antarmuka *Glassmorphism* modern. Dibuat untuk mempermudah tamu menyambung ke jaringan Wi-Fi rumah melalui pemindaian QR Code atau dengan menyalin kata sandi.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fathii3/Wifi-Rumah.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Fathii3/Wifi-Rumah/issues"
+  },
+  "homepage": "https://github.com/Fathii3/Wifi-Rumah#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "puppeteer": "^25.3.0"
+  }
+}

@@ -9,223 +9,270 @@ const puppeteer = require('puppeteer');
 
 const app = express();
 app.use(cors()); // Mengizinkan web statis mengambil data dari server ini
+app.use(express.static(__dirname)); // Melayani berkas statis (index.html, perangkat.html, dll.) secara otomatis
 
 let cachedDevices = [];
 
-// Fungsi Robot Scraper (Puppeteer)
+// Fungsi Robot Scraper (Puppeteer) - Berjalan terus menerus
 async function scrapeRouter() {
-    console.log("Sedang mengambil data dari Router 192.168.1.1...");
-    try {
-        // Mengubah headless menjadi false agar browser Chromium terlihat di layar Anda!
-        const browser = await puppeteer.launch({ headless: false, defaultViewport: null });
-        const page = await browser.newPage();
-        
-        // Meneruskan log dari dalam browser ke terminal Node.js Anda
-        page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
-
-        // 1. Buka halaman router (Sesuai dengan README.md)
-        await page.goto('http://192.168.1.1/admin/login.asp', { waitUntil: 'networkidle2' }).catch(()=> {
-            return page.goto('http://192.168.1.1', { waitUntil: 'networkidle2' });
-        });
-
-        // Fungsi pencari Frame: Router kuno menggunakan <frame> / <frameset>
-        // Frame mungkin butuh waktu ekstra untuk di-load (Puppeteer terkadang terlalu cepat)
-        let targetFrame = null;
-        for (const frame of page.frames()) {
-            try {
-                // Tunggu maksimal 3 detik di tiap frame untuk memastikan apakah elemen ada
-                await frame.waitForSelector('#username1', { timeout: 3000 });
-                targetFrame = frame;
-                break; // Jika ketemu, berhenti mencari
-            } catch (e) {
-                // Tidak ada di frame ini, abaikan
-            }
-        }
-
-        if (!targetFrame) {
-            // Coba sekali lagi di halaman utama sebagai cadangan (jika tidak pakai frame)
-            await page.waitForSelector('#username1', { timeout: 5000 });
-            targetFrame = page;
-        }
-
-        // Isi form dan klik tombol login menggunakan evaluate
-        await targetFrame.evaluate((user, pass) => {
-            const userField = document.querySelector('#username1');
-            const passField = document.querySelector('#psd1');
+    console.log("Memulai pemantauan Router 192.168.1.1 (Real-Time setiap 5 detik)...");
+    
+    while (true) {
+        let browser;
+        try {
+            // Otomatis headless jika berjalan di Android (Termux) agar tidak error GUI
+            const isHeadless = process.platform === 'android' || process.env.HEADLESS === 'true';
+            browser = await puppeteer.launch({ 
+                headless: isHeadless, 
+                defaultViewport: null,
+                args: ['--no-sandbox', '--disable-setuid-sandbox'] // Diperlukan untuk lingkungan Termux/Linux
+            });
+            const page = await browser.newPage();
             
-            if (userField) userField.value = user;
-            if (passField) passField.value = pass;
+            // Meneruskan log dari dalam browser ke terminal Node.js Anda
+            page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
 
-            // PENTING: Jangan gunakan form.submit() karena router (Boa Web Server)
-            // biasanya menjalankan script Javascript khusus di tombol login 
-            // untuk mengenkripsi/mengamankan password sebelum dikirim.
-            // Kita harus meniru "Klik" manusia secara langsung ke tombolnya.
-            const btn = document.querySelector('input[value="Login"], input[type="submit"], input[type="button"], button');
-            if (btn) {
-                btn.click();
-            }
-        }, 'admin', 'Rumah');
+            // 1. Buka halaman router
+            await page.goto('http://192.168.1.1/admin/login.asp', { waitUntil: 'networkidle2' }).catch(() => {
+                return page.goto('http://192.168.1.1', { waitUntil: 'networkidle2' });
+            });
 
-        // Tunggu proses navigasi setelah submit
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
-
-        // Cek apakah muncul halaman error "ERROR:you have logined!" di frame mana pun
-        let isAlreadyLoggedIn = false;
-        for (const frame of page.frames()) {
-            const foundError = await frame.evaluate(() => {
-                if (document.body && document.body.innerText.includes('you have logined')) {
-                    const okBtn = document.querySelector('input[type="button"], input[value="OK"], button');
-                    if (okBtn) {
-                        okBtn.click();
-                        return true;
-                    }
-                }
-                return false;
-            }).catch(() => false);
-            
-            if (foundError) {
-                isAlreadyLoggedIn = true;
-                break;
-            }
-        }
-
-        if (isAlreadyLoggedIn) {
-            console.log("Sistem mendeteksi Anda sudah login sebelumnya, mengeklik tombol OK...");
-            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
-        }
-
-        // Tunggu sebentar agar menu-menu di dalam frame selesai dimuat
-        await new Promise(resolve => setTimeout(resolve, 4000));
-
-        // Fungsi pembantu untuk mencari dan mengeklik menu di frame mana pun
-        async function clickMenu(menuName) {
-            let clickedElements = 0;
-            for (const frame of page.frames()) {
-                const count = await frame.evaluate((name) => {
-                    let clicks = 0;
-                    // Ambil semua elemen teks
-                    const elements = Array.from(document.querySelectorAll('*'));
-                    for (const el of elements) {
-                        // Jika teksnya cocok dan dia adalah elemen terbawah (tidak punya anak elemen teks lain)
-                        if (el.children.length === 0 && el.innerText && el.innerText.trim() === name) {
-                            el.click();
-                            clicks++;
-                        }
-                    }
-                    return clicks;
-                }, menuName);
-                clickedElements += count;
-            }
-            console.log(`Mengeklik ${clickedElements} elemen bertuliskan '${menuName}'`);
-            return clickedElements > 0;
-        }
-
-        // Fungsi pembantu untuk mengekstrak isi tabel dari semua frame saat ini
-        async function extractTables() {
-            let extractedDevices = [];
+            // Cari Frame untuk Form Login
+            let targetFrame = null;
             for (const frame of page.frames()) {
                 try {
-                    const devicesInFrame = await frame.evaluate(() => {
-                        const deviceMap = {};
-                        const rows = document.querySelectorAll('table tr');
-                        
-                        rows.forEach(row => {
-                            const cols = row.querySelectorAll('td');
-                            if (cols.length === 0) return;
-
-                            let macColIndex = -1;
-                            let macAddress = "";
-                            for (let j = 0; j < cols.length; j++) {
-                                const txt = cols[j].innerText.trim();
-                                // Deteksi apakah ini format MAC Address
-                                if (/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/i.test(txt)) {
-                                    macColIndex = j;
-                                    macAddress = txt.toLowerCase();
-                                }
-                            }
-
-                            if (macAddress !== "") {
-                                if (!deviceMap[macAddress]) {
-                                    deviceMap[macAddress] = { mac: macAddress, name: "Unknown", ip: "-", type: "smartphone", icon: "smartphone", baseDown: 0, baseUp: 0 };
-                                }
-
-                                // Tabel "Home Gateway All Down Device Information" (Device Info)
-                                if (cols.length >= 10 && macColIndex === 6) {
-                                    deviceMap[macAddress].name = cols[0].innerText.trim() || "Unknown";
-                                    deviceMap[macAddress].ip = cols[7].innerText.trim();
-                                } 
-                                
-                                // Tabel "Home gateway equipment under the implementation of bandwidth monitoring" (Bandwidth Info)
-                                if (cols.length === 3 && macColIndex === 0) {
-                                    const upBps = parseInt(cols[1].innerText.replace(/[^0-9]/g, '')) || 0;
-                                    const downBps = parseInt(cols[2].innerText.replace(/[^0-9]/g, '')) || 0;
-                                    deviceMap[macAddress].baseUp = upBps / 1000; // Convert ke Kbps
-                                    deviceMap[macAddress].baseDown = downBps / 1000; // Convert ke Kbps
-                                }
-                            }
-                        });
-                        return Object.values(deviceMap);
-                    });
-
-                    if (devicesInFrame && devicesInFrame.length > 0) {
-                        extractedDevices = extractedDevices.concat(devicesInFrame);
-                    }
-                } catch(e) {}
+                    await frame.waitForSelector('#username1', { timeout: 3000 });
+                    targetFrame = frame;
+                    break;
+                } catch (e) {}
             }
-            return extractedDevices;
-        }
 
-        let allDevices = [];
+            if (!targetFrame) {
+                await page.waitForSelector('#username1', { timeout: 5000 });
+                targetFrame = page;
+            }
 
-        // 1. Arahkan robot ke menu "Device Info" untuk nama dan IP
-        console.log("Mengeklik menu 'Device Info' secara otomatis...");
-        await clickMenu('Device Info');
-        await new Promise(r => setTimeout(r, 4000)); // Tunggu halamannya dimuat
-        const infoData = await extractTables();
-        allDevices = allDevices.concat(infoData);
-        console.log(`Ditemukan ${infoData.length} data dari menu Device Info.`);
+            // Isi form dan login
+            await targetFrame.evaluate((user, pass) => {
+                const userField = document.querySelector('#username1');
+                const passField = document.querySelector('#psd1');
+                if (userField) userField.value = user;
+                if (passField) passField.value = pass;
+                const btn = document.querySelector('input[value="Login"], input[type="submit"], input[type="button"], button');
+                if (btn) btn.click();
+            }, 'admin', 'Rumah');
 
-        // 2. Arahkan robot ke menu "Bandwidth Info" untuk mendapatkan kecepatan
-        console.log("Mengeklik menu 'Bandwidth Info' secara otomatis...");
-        await clickMenu('Bandwidth Info');
-        await new Promise(r => setTimeout(r, 4000));
-        const bwData = await extractTables();
-        allDevices = allDevices.concat(bwData);
-        console.log(`Ditemukan ${bwData.length} data dari menu Bandwidth Info.`);
+            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
 
-        // Gabungkan data dari kedua menu berdasarkan MAC Address
-        if (allDevices.length > 0) {
-            const merged = {};
-            allDevices.forEach(dev => {
-                if (!merged[dev.mac]) {
-                    merged[dev.mac] = dev;
-                } else {
-                    if (dev.name !== "Unknown") merged[dev.mac].name = dev.name;
-                    if (dev.ip !== "-") merged[dev.mac].ip = dev.ip;
-                    if (dev.baseDown > 0) merged[dev.mac].baseDown = dev.baseDown;
-                    if (dev.baseUp > 0) merged[dev.mac].baseUp = dev.baseUp;
+            // Cek apakah sudah login sebelumnya
+            let isAlreadyLoggedIn = false;
+            for (const frame of page.frames()) {
+                const foundError = await frame.evaluate(() => {
+                    if (document.body && document.body.innerText.includes('you have logined')) {
+                        const okBtn = document.querySelector('input[type="button"], input[value="OK"], button');
+                        if (okBtn) {
+                            okBtn.click();
+                            return true;
+                        }
+                    }
+                    return false;
+                }).catch(() => false);
+                
+                if (foundError) {
+                    isAlreadyLoggedIn = true;
+                    break;
                 }
-            });
-            
-            // Simpan semua perangkat yang berhasil diekstrak
-            cachedDevices = Object.values(merged);
-            console.log("Berhasil menggabungkan data! Total:", cachedDevices.length, "perangkat aktif.");
-        } else {
-            console.log("Gagal menemukan perangkat di kedua menu tersebut.");
-        }
+            }
 
-        console.log("Selesai memantau.");
-        await browser.close();
-    } catch (error) {
-        console.error("Gagal mengambil data dari router:", error.message);
+            if (isAlreadyLoggedIn) {
+                console.log("Sistem mendeteksi Anda sudah login sebelumnya, mengeklik tombol OK...");
+                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
+            }
+
+            // Tunggu menu selesai dimuat
+            await new Promise(resolve => setTimeout(resolve, 4000));
+
+            // Fungsi pembantu mengeklik menu
+            async function clickMenu(menuName, preferredFrameName = null) {
+                let clickedElements = 0;
+                if (preferredFrameName) {
+                    const frame = page.frames().find(f => f.name() === preferredFrameName);
+                    if (frame) {
+                        const count = await frame.evaluate((name) => {
+                            let clicks = 0;
+                            const elements = Array.from(document.querySelectorAll('*'));
+                            for (const el of elements) {
+                                if (el.children.length === 0 && el.innerText && el.innerText.trim() === name) {
+                                    el.click();
+                                    clicks++;
+                                }
+                            }
+                            return clicks;
+                        }, menuName).catch(() => 0);
+                        clickedElements += count;
+                    }
+                }
+                if (clickedElements === 0) {
+                    for (const frame of page.frames()) {
+                        const count = await frame.evaluate((name) => {
+                            let clicks = 0;
+                            const elements = Array.from(document.querySelectorAll('*'));
+                            for (const el of elements) {
+                                if (el.children.length === 0 && el.innerText && el.innerText.trim() === name) {
+                                    el.click();
+                                    clicks++;
+                                }
+                            }
+                            return clicks;
+                        }, menuName).catch(() => 0);
+                        clickedElements += count;
+                    }
+                }
+                return clickedElements > 0;
+            }
+
+            // Fungsi pembantu mengekstrak tabel
+            async function extractTables() {
+                let extractedDevices = [];
+                for (const frame of page.frames()) {
+                    try {
+                        const devicesInFrame = await frame.evaluate(() => {
+                            const deviceMap = {};
+                            const rows = document.querySelectorAll('table tr');
+                            
+                            rows.forEach(row => {
+                                const cols = row.querySelectorAll('td');
+                                if (cols.length === 0) return;
+
+                                let macColIndex = -1;
+                                let macAddress = "";
+                                let ipAddress = "-";
+                                let deviceName = "Unknown";
+
+                                for (let j = 0; j < cols.length; j++) {
+                                    const txt = cols[j].innerText.trim();
+                                    if (/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/i.test(txt)) {
+                                        macColIndex = j;
+                                        macAddress = txt.toLowerCase();
+                                    } else if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(txt)) {
+                                        ipAddress = txt;
+                                    }
+                                }
+
+                                if (macAddress !== "") {
+                                    const col0Text = cols[0].innerText.trim();
+                                    if (col0Text && col0Text !== "-" && !/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/i.test(col0Text) && !/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(col0Text)) {
+                                        if (/^\d+$/.test(col0Text) && cols.length > 1) {
+                                            const col1Text = cols[1].innerText.trim();
+                                            if (col1Text && col1Text !== "-" && !/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/i.test(col1Text) && !/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(col1Text)) {
+                                                deviceName = col1Text;
+                                            }
+                                        } else {
+                                            deviceName = col0Text;
+                                        }
+                                    }
+
+                                    // FILTER: Abaikan BSSID router dan baris BSSID tersendiri
+                                    const isRouterMac = macAddress.replace(/:/g, '') === '98c7a46b875d';
+                                    const isBssidRow = deviceName.toUpperCase() === 'BSSID' || macAddress === '98:c7:a4:6b:87:5d';
+                                    if (isRouterMac || isBssidRow) {
+                                        return;
+                                    }
+
+                                    if (!deviceMap[macAddress]) {
+                                        deviceMap[macAddress] = { 
+                                            mac: macAddress, 
+                                            name: deviceName, 
+                                            ip: ipAddress, 
+                                            type: "smartphone", 
+                                            icon: "smartphone", 
+                                            baseDown: 0, 
+                                            baseUp: 0 
+                                        };
+                                    } else {
+                                        if (deviceName !== "Unknown") deviceMap[macAddress].name = deviceName;
+                                        if (ipAddress !== "-") deviceMap[macAddress].ip = ipAddress;
+                                    }
+
+                                    if (cols.length === 3 && macColIndex === 0) {
+                                        const upBps = parseInt(cols[1].innerText.replace(/[^0-9]/g, '')) || 0;
+                                        const downBps = parseInt(cols[2].innerText.replace(/[^0-9]/g, '')) || 0;
+                                        deviceMap[macAddress].baseUp = upBps / 1000;
+                                        deviceMap[macAddress].baseDown = downBps / 1000;
+                                    }
+                                }
+                            });
+                            return Object.values(deviceMap);
+                        });
+
+                        if (devicesInFrame && devicesInFrame.length > 0) {
+                            extractedDevices = extractedDevices.concat(devicesInFrame);
+                        }
+                    } catch(e) {
+                        console.error("EXTRACT ERROR in frame:", frame.name(), e.message);
+                    }
+                }
+                return extractedDevices;
+            }
+
+            // Klik menu utama 'LAN & WLAN' sekali di awal
+            console.log("Mengeklik menu utama 'LAN & WLAN'...");
+            await clickMenu('LAN & WLAN', 'topFrame');
+            await new Promise(r => setTimeout(r, 4000));
+
+            // Loop utama penyegaran data setiap 5 detik di browser yang sama
+            while (true) {
+                console.log("\n--- Memindai data perangkat (Real-Time setiap 5 detik) ---");
+                let allDevices = [];
+
+                // Klik sub-menu 'Device Info'
+                await clickMenu('Device Info', 'leftFrame');
+                await new Promise(r => setTimeout(r, 1000));
+                const infoData = await extractTables();
+                allDevices = allDevices.concat(infoData);
+
+                // Klik sub-menu 'Bandwidth Info'
+                await clickMenu('Bandwidth Info', 'leftFrame');
+                await new Promise(r => setTimeout(r, 1000));
+                const bwData = await extractTables();
+                allDevices = allDevices.concat(bwData);
+
+                // Gabungkan data
+                if (allDevices.length > 0) {
+                    const merged = {};
+                    allDevices.forEach(dev => {
+                        if (!merged[dev.mac]) {
+                            merged[dev.mac] = dev;
+                        } else {
+                            if (dev.name !== "Unknown") merged[dev.mac].name = dev.name;
+                            if (dev.ip !== "-") merged[dev.mac].ip = dev.ip;
+                            if (dev.baseDown > 0) merged[dev.mac].baseDown = dev.baseDown;
+                            if (dev.baseUp > 0) merged[dev.mac].baseUp = dev.baseUp;
+                        }
+                    });
+                    
+                    cachedDevices = Object.values(merged);
+                    console.log(`Pembaruan sukses! Terdeteksi ${cachedDevices.length} perangkat aktif.`);
+                } else {
+                    console.log("Peringatan: Tidak ada perangkat terdeteksi pada pemindaian ini.");
+                }
+
+                // Jeda 5 detik
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+
+        } catch (error) {
+            console.error("Koneksi terputus atau browser ditutup. Error:", error.message);
+            if (browser) {
+                await browser.close().catch(() => {});
+            }
+            console.log("Mencoba menyambungkan kembali dalam 5 detik...");
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
     }
 }
 
-// Untuk sementara waktu saat debugging, kita matikan sistem pengulangan 30 detik
-// agar browser tidak terus-menerus muncul dan tertutup di layar Anda.
-// setInterval(scrapeRouter, 30000);
-
-// Jalankan sekali saat server pertama kali menyala
+// Jalankan sistem scraper real-time
 scrapeRouter();
 
 // ----------------------------------------------------

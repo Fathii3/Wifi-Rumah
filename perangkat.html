@@ -147,7 +147,14 @@
                 // Arahkan ke tunnel HTTPS Anda jika website dibuka dari Vercel (bukan lokal)
                 const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '192.168.1.2';
                 const apiHost = isLocal ? '' : 'https://icy-teeth-travel.loca.lt';
-                const response = await fetch(`${apiHost}/api/devices`);
+                
+                // Tambahkan header khusus untuk melewati halaman konfirmasi/peringatan tunnel secara otomatis
+                const response = await fetch(`${apiHost}/api/devices`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true',
+                        'Bypass-Tunnel-Reminder': 'true'
+                    }
+                });
                 
                 if (!response.ok) {
                     // Coba ambil pesan error dari server NodeJS

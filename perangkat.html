@@ -144,8 +144,9 @@
 
         async function fetchDevices() {
             try {
-                // Ambil data dari server. Gunakan host manual jika file dibuka langsung (file:///)
-                const apiHost = window.location.protocol === 'file:' ? 'http://192.168.1.2:3000' : '';
+                // Arahkan ke tunnel HTTPS Anda jika website dibuka dari Vercel (bukan lokal)
+                const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '192.168.1.2';
+                const apiHost = isLocal ? '' : 'https://chubby-doors-spend.loca.lt';
                 const response = await fetch(`${apiHost}/api/devices`);
                 
                 if (!response.ok) {

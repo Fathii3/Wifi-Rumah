@@ -7,6 +7,7 @@
     <title>Wi-Fi Connect - Perangkat</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -180,6 +181,18 @@
             }
         }
 
+        function getDeviceIcon(iconName) {
+            const map = {
+                'smartphone': '&#xe32c;',
+                'laptop': '&#xe31e;',
+                'tablet': '&#xe32f;',
+                'desktop': '&#xe30c;',
+                'tv': '&#xe333;',
+                'gamepad': '&#xe338;'
+            };
+            return map[iconName] || '&#xe32c;';
+        }
+
         function renderDevices() {
             const list = document.getElementById('devices-list');
             if (currentDevices.length === 0) {
@@ -209,7 +222,7 @@
                 row.innerHTML = `
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <span class="material-symbols-outlined">${dev.icon || '&#xe32c;'}</span>
+                        <span class="material-symbols-outlined">${getDeviceIcon(dev.icon)}</span>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">

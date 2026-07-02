@@ -69,26 +69,66 @@ async function scrapeRouter() {
         // Tunggu proses navigasi setelah submit
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
 
+        // Cek apakah muncul halaman error "ERROR:you have logined!" di frame mana pun
+        let isAlreadyLoggedIn = false;
+        for (const frame of page.frames()) {
+            const foundError = await frame.evaluate(() => {
+                if (document.body && document.body.innerText.includes('you have logined')) {
+                    const okBtn = document.querySelector('input[type="button"], input[value="OK"], button');
+                    if (okBtn) {
+                        okBtn.click();
+                        return true;
+                    }
+                }
+                return false;
+            }).catch(() => false);
+            
+            if (foundError) {
+                isAlreadyLoggedIn = true;
+                break;
+            }
+        }
+
+        if (isAlreadyLoggedIn) {
+            console.log("Sistem mendeteksi Anda sudah login sebelumnya, mengeklik tombol OK...");
+            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
+        }
+
         // Tunggu sebentar agar menu-menu di dalam frame selesai dimuat
         await new Promise(resolve => setTimeout(resolve, 4000));
 
-        // Kita buat looping selama 1 menit (30 kali x 2 detik) 
-        // agar Anda punya waktu untuk mengeklik menu di browser Chromium.
-        console.log("Robot sedang standby menunggu Anda mengeklik menu yang berisi tabel perangkat...");
-        
-        for (let i = 0; i < 30; i++) {
-            let allDevices = [];
+        // Fungsi pembantu untuk mencari dan mengeklik menu di frame mana pun
+        async function clickMenu(menuName) {
+            let clickedElements = 0;
+            for (const frame of page.frames()) {
+                const count = await frame.evaluate((name) => {
+                    let clicks = 0;
+                    // Ambil semua elemen teks
+                    const elements = Array.from(document.querySelectorAll('*'));
+                    for (const el of elements) {
+                        // Jika teksnya cocok dan dia adalah elemen terbawah (tidak punya anak elemen teks lain)
+                        if (el.children.length === 0 && el.innerText && el.innerText.trim() === name) {
+                            el.click();
+                            clicks++;
+                        }
+                    }
+                    return clicks;
+                }, menuName);
+                clickedElements += count;
+            }
+            console.log(`Mengeklik ${clickedElements} elemen bertuliskan '${menuName}'`);
+            return clickedElements > 0;
+        }
+
+        // Fungsi pembantu untuk mengekstrak isi tabel dari semua frame saat ini
+        async function extractTables() {
+            let extractedDevices = [];
             for (const frame of page.frames()) {
                 try {
                     const devicesInFrame = await frame.evaluate(() => {
                         const deviceMap = {};
                         const rows = document.querySelectorAll('table tr');
                         
-                        // Jangan spam log jika tabelnya kosong
-                        if (rows.length > 0) {
-                            console.log(`Menemukan ${rows.length} baris tabel di frame ini.`);
-                        }
-
                         rows.forEach(row => {
                             const cols = row.querySelectorAll('td');
                             if (cols.length === 0) return;
@@ -97,10 +137,10 @@ async function scrapeRouter() {
                             let macAddress = "";
                             for (let j = 0; j < cols.length; j++) {
                                 const txt = cols[j].innerText.trim();
+                                // Deteksi apakah ini format MAC Address
                                 if (/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/i.test(txt)) {
                                     macColIndex = j;
                                     macAddress = txt.toLowerCase();
-                                    break;
                                 }
                             }
 
@@ -109,56 +149,73 @@ async function scrapeRouter() {
                                     deviceMap[macAddress] = { mac: macAddress, name: "Unknown", ip: "-", type: "smartphone", icon: "smartphone", baseDown: 0, baseUp: 0 };
                                 }
 
+                                // Tabel "Home Gateway All Down Device Information" (Device Info)
                                 if (cols.length >= 10 && macColIndex === 6) {
                                     deviceMap[macAddress].name = cols[0].innerText.trim() || "Unknown";
                                     deviceMap[macAddress].ip = cols[7].innerText.trim();
                                 } 
-                                else if (cols.length >= 7 && cols.length < 10 && macColIndex === 4) {
-                                    deviceMap[macAddress].name = cols[0].innerText.trim() || "Unknown";
-                                    deviceMap[macAddress].ip = cols[5].innerText.trim();
-                                }
                                 
+                                // Tabel "Home gateway equipment under the implementation of bandwidth monitoring" (Bandwidth Info)
                                 if (cols.length === 3 && macColIndex === 0) {
                                     const upBps = parseInt(cols[1].innerText.replace(/[^0-9]/g, '')) || 0;
                                     const downBps = parseInt(cols[2].innerText.replace(/[^0-9]/g, '')) || 0;
-                                    deviceMap[macAddress].baseUp = upBps / 1000000;
-                                    deviceMap[macAddress].baseDown = downBps / 1000000;
+                                    deviceMap[macAddress].baseUp = upBps / 1000; // Convert ke Kbps
+                                    deviceMap[macAddress].baseDown = downBps / 1000; // Convert ke Kbps
                                 }
                             }
                         });
-                        return Object.values(deviceMap).filter(dev => dev.ip !== "-");
+                        return Object.values(deviceMap);
                     });
 
                     if (devicesInFrame && devicesInFrame.length > 0) {
-                        allDevices = allDevices.concat(devicesInFrame);
+                        extractedDevices = extractedDevices.concat(devicesInFrame);
                     }
                 } catch(e) {}
             }
+            return extractedDevices;
+        }
 
-            if (allDevices.length > 0) {
-                const merged = {};
-                allDevices.forEach(dev => {
-                    if (!merged[dev.mac]) {
-                        merged[dev.mac] = dev;
-                    } else {
-                        if (dev.name !== "Unknown") merged[dev.mac].name = dev.name;
-                        if (dev.ip !== "-") merged[dev.mac].ip = dev.ip;
-                        if (dev.baseDown > 0) merged[dev.mac].baseDown = dev.baseDown;
-                        if (dev.baseUp > 0) merged[dev.mac].baseUp = dev.baseUp;
-                    }
-                });
-                
-                cachedDevices = Object.values(merged);
-                console.log("BOOM! Berhasil menemukan tabel! Total:", cachedDevices.length, "perangkat.");
-                break; // Berhenti mencari karena data sudah ketemu!
-            }
+        let allDevices = [];
 
-            // Tunggu 2 detik sebelum ngecek tabel lagi
-            await new Promise(r => setTimeout(r, 2000));
+        // 1. Arahkan robot ke menu "Device Info" untuk nama dan IP
+        console.log("Mengeklik menu 'Device Info' secara otomatis...");
+        await clickMenu('Device Info');
+        await new Promise(r => setTimeout(r, 4000)); // Tunggu halamannya dimuat
+        const infoData = await extractTables();
+        allDevices = allDevices.concat(infoData);
+        console.log(`Ditemukan ${infoData.length} data dari menu Device Info.`);
+
+        // 2. Arahkan robot ke menu "Bandwidth Info" untuk mendapatkan kecepatan
+        console.log("Mengeklik menu 'Bandwidth Info' secara otomatis...");
+        await clickMenu('Bandwidth Info');
+        await new Promise(r => setTimeout(r, 4000));
+        const bwData = await extractTables();
+        allDevices = allDevices.concat(bwData);
+        console.log(`Ditemukan ${bwData.length} data dari menu Bandwidth Info.`);
+
+        // Gabungkan data dari kedua menu berdasarkan MAC Address
+        if (allDevices.length > 0) {
+            const merged = {};
+            allDevices.forEach(dev => {
+                if (!merged[dev.mac]) {
+                    merged[dev.mac] = dev;
+                } else {
+                    if (dev.name !== "Unknown") merged[dev.mac].name = dev.name;
+                    if (dev.ip !== "-") merged[dev.mac].ip = dev.ip;
+                    if (dev.baseDown > 0) merged[dev.mac].baseDown = dev.baseDown;
+                    if (dev.baseUp > 0) merged[dev.mac].baseUp = dev.baseUp;
+                }
+            });
+            
+            // Simpan semua perangkat yang berhasil diekstrak
+            cachedDevices = Object.values(merged);
+            console.log("Berhasil menggabungkan data! Total:", cachedDevices.length, "perangkat aktif.");
+        } else {
+            console.log("Gagal menemukan perangkat di kedua menu tersebut.");
         }
 
         console.log("Selesai memantau.");
-        // await browser.close(); // Browser tidak ditutup otomatis agar Anda bisa melihat
+        await browser.close();
     } catch (error) {
         console.error("Gagal mengambil data dari router:", error.message);
     }

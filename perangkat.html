@@ -37,6 +37,26 @@
 
 <body class="bg-background text-on-surface font-body-lg min-h-screen overflow-x-hidden selection:bg-primary/20">
 
+<!-- SVG Liquid Glass Filter Definition -->
+<svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="liquid-glass" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.2" result="blur" />
+      <feSpecularLighting in="blur" surfaceScale="3.5" specularConstant="1.2" specularExponent="25" lighting-color="#ffffff" result="specular">
+        <feDistantLight azimuth="225" elevation="65" />
+      </feSpecularLighting>
+      <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss" />
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25" result="shadow" />
+      <feMerge>
+        <feMergeNode in="shadow" />
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="gloss" />
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
+
+
     <!-- Atmospheric Background Elements -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none" style="z-index: 0;" id="bg-elements">
         <div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-glow-indigo rounded-full bg-glow"></div>
@@ -61,7 +81,33 @@
                 </div>
 
                 <div id="devices-list" class="flex flex-col divide-y divide-black/5 p-2">
-                    <!-- Dimuat dinamis lewat JS -->
+                    <!-- Skeleton Loader -->
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-primary/10 animate-pulse"></div>
+                            <div class="space-y-2">
+                                <div class="h-3.5 bg-black/10 rounded w-24 animate-pulse"></div>
+                                <div class="h-2.5 bg-black/10 rounded w-32 animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <div class="h-3 bg-black/10 rounded w-16 animate-pulse"></div>
+                            <div class="h-3 bg-black/10 rounded w-16 animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-primary/10 animate-pulse"></div>
+                            <div class="space-y-2">
+                                <div class="h-3.5 bg-black/10 rounded w-20 animate-pulse"></div>
+                                <div class="h-2.5 bg-black/10 rounded w-28 animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <div class="h-3 bg-black/10 rounded w-14 animate-pulse"></div>
+                            <div class="h-3 bg-black/10 rounded w-14 animate-pulse"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,17 +121,17 @@
             class="pointer-events-auto flex justify-between items-center px-6 py-2 gap-4 md:gap-10 bg-white/80 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-full">
             <a href="index.html"
                 class="nav-btn flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-on-surface-variant hover:text-primary">
-                <span class="material-symbols-outlined text-[28px]">home</span>
+                <span class="material-symbols-outlined text-[28px]">&#xe587;</span>
                 <span class="text-[10px] font-bold uppercase mt-1">Beranda</span>
             </a>
             <a href="kecepatan.html"
                 class="nav-btn flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-on-surface-variant hover:text-primary">
-                <span class="material-symbols-outlined text-[28px]">speed</span>
+                <span class="material-symbols-outlined text-[28px]">&#xe9e4;</span>
                 <span class="text-[10px] font-bold uppercase mt-1">Speed</span>
             </a>
             <a href="perangkat.html"
                 class="nav-btn flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-on-surface-variant hover:text-primary">
-                <span class="material-symbols-outlined text-[28px]">devices</span>
+                <span class="material-symbols-outlined text-[28px]">&#xe1b1;</span>
                 <span class="text-[10px] font-bold uppercase mt-1">Devices</span>
             </a>
         </nav>
@@ -125,7 +171,7 @@
                 list.innerHTML = `
                     <div class="p-8 text-center flex flex-col items-center justify-center gap-4">
                         <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-2">
-                            <span class="material-symbols-outlined text-[36px]">wifi_off</span>
+                            <span class="material-symbols-outlined text-[36px]">&#xe648;</span>
                         </div>
                         <h3 class="font-bold text-lg text-on-surface">${title}</h3>
                         <p class="text-on-surface-variant text-sm">${errorMessage}</p>
@@ -136,38 +182,51 @@
 
         function renderDevices() {
             const list = document.getElementById('devices-list');
-            if (currentDevices.length === 0) return;
+            if (currentDevices.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-sm text-on-surface-variant font-medium">Belum ada perangkat terhubung.</div>';
+                return;
+            }
             
             list.innerHTML = '';
 
             currentDevices.forEach((dev) => {
-                // Simulasi traffic untuk tampilan UI saja agar tampak real-time
-                const jitterDown = (Math.random() * 0.5) - 0.2;
-                const jitterUp = (Math.random() * 0.1) - 0.05;
+                let currentDown = "Tidak Terdeteksi";
+                let currentUp = "Tidak Terdeteksi";
 
-                let currentDown = Math.max(0, (dev.baseDown || 0) + jitterDown).toFixed(1);
-                let currentUp = Math.max(0, (dev.baseUp || 0) + jitterUp).toFixed(1);
+                // Jika baseDown > 0, berarti kita dapat data bandwidth
+                if (dev.baseDown && dev.baseDown > 0) {
+                    const jitterDown = (Math.random() * 5) - 2; // jitter yang lebih besar untuk kbps
+                    const jitterUp = (Math.random() * 1) - 0.5;
+                    currentDown = Math.max(0, dev.baseDown + jitterDown).toFixed(1) + " Kbps";
+                    currentUp = Math.max(0, dev.baseUp + jitterUp).toFixed(1) + " Kbps";
+                }
+
+                // Anggap aktif jika data berhasil didapat (router biasanya menghapus yang lama)
+                const statusLabel = `<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase tracking-wider">Aktif</span>`;
 
                 const row = document.createElement('div');
                 row.className = "flex items-center justify-between p-4 hover:bg-black/5 transition-colors rounded-xl";
                 row.innerHTML = `
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <span class="material-symbols-outlined">${dev.icon || 'smartphone'}</span>
+                        <span class="material-symbols-outlined">${dev.icon || '&#xe32c;'}</span>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-on-surface">${dev.name}</p>
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold text-sm text-on-surface">${dev.name}</p>
+                            ${statusLabel}
+                        </div>
                         <p class="text-xs text-on-surface-variant font-mono mt-0.5">IP: ${dev.ip || '-'} | MAC: ${dev.mac || '-'}</p>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-1 text-xs font-semibold">
                     <div class="flex items-center gap-1 text-blue-600">
-                        <span class="material-symbols-outlined text-[14px]">arrow_downward</span>
-                        <span class="w-10 text-right">${currentDown}</span> Mbps
+                        <span class="material-symbols-outlined text-[14px]">&#xe5db;</span>
+                        <span class="text-right">${currentDown}</span>
                     </div>
                     <div class="flex items-center gap-1 text-purple-600">
-                        <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
-                        <span class="w-10 text-right">${currentUp}</span> Mbps
+                        <span class="material-symbols-outlined text-[14px]">&#xe5d8;</span>
+                        <span class="text-right">${currentUp}</span>
                     </div>
                 </div>
             `;

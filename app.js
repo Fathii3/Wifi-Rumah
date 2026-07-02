@@ -25,6 +25,11 @@ function formatISPName(rawName) {
 async function detectISP() {
     const ispElements = document.querySelectorAll('.isp-name-display');
     const cityElements = document.querySelectorAll('.isp-city-display');
+    
+    const removeSkeleton = (el) => {
+        el.classList.remove('animate-pulse', 'bg-black/10', 'bg-primary/20', 'h-4', 'h-5', 'w-20', 'w-24', 'w-28', 'inline-block', 'rounded', 'mt-1');
+    };
+
     try {
         const response = await fetch('https://ipwho.is/');
         const data = await response.json();
@@ -34,15 +39,15 @@ async function detectISP() {
             ispName = formatISPName(ispName);
             
             const cityName = data.city || "Lokasi Tidak Diketahui";
-            ispElements.forEach(el => { el.innerText = ispName; });
-            cityElements.forEach(el => { el.innerText = cityName; });
+            ispElements.forEach(el => { removeSkeleton(el); el.innerText = ispName; });
+            cityElements.forEach(el => { removeSkeleton(el); el.innerText = cityName; });
         } else {
             throw new Error("API tidak berhasil merespons data ISP.");
         }
     } catch (error) {
         console.log("Gagal mendeteksi ISP:", error);
-        ispElements.forEach(el => { el.innerText = "Tidak Terdeteksi"; });
-        cityElements.forEach(el => { el.innerText = "-"; });
+        ispElements.forEach(el => { removeSkeleton(el); el.innerText = "Tidak Terdeteksi"; });
+        cityElements.forEach(el => { removeSkeleton(el); el.innerText = "-"; });
     }
 }
 

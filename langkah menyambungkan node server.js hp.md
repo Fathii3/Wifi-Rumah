@@ -33,7 +33,7 @@ Agar Puppeteer mendeteksi dan menggunakan browser Chromium bawaan HP (bukan menc
 
 ```bash
 echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' >> ~/.bashrc
-echo 'export PUPPETEER_EXECUTABLE_PATH=$(which chromium)' >> ~/.bashrc
+echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium' >> ~/.bashrc
 source ~/.bashrc
 ```
 

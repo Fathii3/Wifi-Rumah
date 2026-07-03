@@ -295,11 +295,15 @@ async function startNgrok() {
 
     const tokenPath = path.join(__dirname, 'ngrok_token.txt');
     if (!fs.existsSync(tokenPath)) {
+        console.warn("⚠️ Berkas 'ngrok_token.txt' tidak ditemukan di folder server. Terowongan Ngrok otomatis dinonaktifkan.");
         return;
     }
     
     const token = fs.readFileSync(tokenPath, 'utf8').trim();
-    if (!token) return;
+    if (!token) {
+        console.warn("⚠️ Berkas 'ngrok_token.txt' kosong. Terowongan Ngrok otomatis dinonaktifkan.");
+        return;
+    }
 
     console.log("Mendeteksi ngrok_token.txt. Memulai secure tunnel Ngrok secara otomatis...");
 
@@ -314,14 +318,14 @@ async function startNgrok() {
         }
     }
 
-    // Jalankan ngrok menggunakan npx
-    const args = ['ngrok', 'http', '3000', '--authtoken', token, ...domainArgs];
-    const ngrokProcess = spawn('npx', args, {
+    // Jalankan ngrok secara langsung (menggunakan binary ngrok global di sistem)
+    const args = ['http', '3000', '--authtoken', token, ...domainArgs];
+    const ngrokProcess = spawn('ngrok', args, {
         shell: true
     });
 
     ngrokProcess.on('error', (err) => {
-        console.error("Gagal menjalankan Ngrok:", err.message);
+        console.error("⚠️ Gagal menjalankan Ngrok secara otomatis. Pastikan aplikasi 'ngrok' sudah terpasang secara global di sistem/HP Anda. Detail:", err.message);
     });
 
     // Pastikan proses dimatikan ketika aplikasi Node utama ditutup

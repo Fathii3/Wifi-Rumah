@@ -22,7 +22,16 @@ Panduan ini berisi langkah-langkah lengkap untuk memasang dan menjalankan backen
    ```bash
    pkg install x11-repo -y
    pkg update
-   pkg install nodejs-lts chromium git -y
+   pkg install nodejs-lts chromium git which -y
+   ```
+
+4. **Pasang Ngrok Resmi (Khusus HP ARM64):**
+   Unduh, ekstrak, dan pasang berkas binary Ngrok resmi untuk Linux ARM64 agar dapat dipanggil secara global di Termux HP:
+   ```bash
+   pkg install wget -y
+   wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
+   tar xvzf ngrok-v3-stable-linux-arm64.tgz
+   mv ngrok $PREFIX/bin/
    ```
 
 ---

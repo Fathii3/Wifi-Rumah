@@ -113,14 +113,31 @@ Jalankan perintah ini satu per satu di dalam folder `Wifi-Rumah` untuk memasukka
 
 ## 🚀 Langkah 5: Menjalankan Server Scraper
 
-Jalankan perintah berikut secara berurutan untuk memasang library Node.js dan menjalankan server:
+Jalankan perintah berikut secara berurutan untuk menyiapkan DNS, masuk ke lingkungan virtual chroot (wajib agar Ngrok bisa internetan), memasang library Node.js, dan menjalankan server:
 
-1. **Instal Dependensi:**
+1. **Buat folder konfigurasi DNS Termux:**
+   ```bash
+   mkdir -p /data/data/com.termux/files/usr/etc
+   ```
+
+2. **Tulis DNS Google ke dalam konfigurasi DNS Termux:**
+   ```bash
+   echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /data/data/com.termux/files/usr/etc/resolv.conf
+   ```
+
+3. **Masuk ke lingkungan Chroot Linux (Wajib):**
+   ```bash
+   termux-chroot
+   ```
+   *(Tampilan terminal Anda mungkin sedikit berubah, tetap di dalam lingkungan ini).*
+
+4. **Instal Dependensi Node.js:**
+   Pastikan Anda berada di folder `Wifi-Rumah`, lalu pasang dependensi:
    ```bash
    npm install
    ```
 
-2. **Jalankan Server:**
+5. **Jalankan Server Scraper:**
    ```bash
    node server.js
    ```

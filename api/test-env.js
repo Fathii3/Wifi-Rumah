@@ -1,23 +1,43 @@
-// Endpoint tes untuk melihat variabel lingkungan di Vercel (Tanpa membocorkan token/password)
+// Endpoint debug untuk mendiagnosis format data Edge Config di Vercel
 module.exports = async (req, res) => {
-    const keys = Object.keys(process.env).map(key => {
-        // Cek jika nilainya ada
-        const hasValue = !!process.env[key];
-        // Sensor sebagian nilai untuk keamanan
-        let maskedValue = "null/undefined";
-        if (hasValue) {
-            const val = process.env[key];
-            if (val.length > 15) {
-                maskedValue = val.slice(0, 10) + "..." + val.slice(-5);
+    let edgeConfigData = null;
+    let fetchError = null;
+    let fetchStatus = null;
+    
+    if (process.env.EDGE_CONFIG) {
+        try {
+            const response = await fetch(process.env.EDGE_CONFIG);
+            fetchStatus = response.status;
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Sensor nilai sensitif sebelum dikirim ke response API
+                edgeConfigData = {};
+                for (const key of Object.keys(data)) {
+                    const val = data[key];
+                    if (key.includes('PASSWORD')) {
+                        edgeConfigData[key] = "censored_length_" + (val ? val.length : 0);
+                    } else if (typeof val === 'string' && val.length > 15) {
+                        edgeConfigData[key] = val.slice(0, 10) + "..." + val.slice(-5);
+                    } else {
+                        edgeConfigData[key] = val;
+                    }
+                }
             } else {
-                maskedValue = "terisi";
+                fetchError = `HTTP error! Status: ${response.status}`;
             }
+        } catch (e) {
+            fetchError = e.message;
         }
-        return { key, hasValue, value: maskedValue };
-    });
+    } else {
+        fetchError = "EDGE_CONFIG environment variable is not defined";
+    }
 
     return res.status(200).json({
-        message: "Diagnostic Environment Variables",
-        variables: keys
+        message: "Diagnostic Edge Config Response",
+        hasEdgeConfigEnv: !!process.env.EDGE_CONFIG,
+        fetchStatus,
+        fetchError,
+        data: edgeConfigData
     });
 };

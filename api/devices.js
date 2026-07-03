@@ -24,7 +24,8 @@ module.exports = async (req, res) => {
             const response = await fetch(process.env.EDGE_CONFIG);
             if (response.ok) {
                 const config = await response.json();
-                if (config.API_HOST) apiHost = config.API_HOST;
+                const items = config.items || {};
+                if (items.API_HOST) apiHost = items.API_HOST;
             }
         } catch (e) {
             console.error("Gagal mengambil API_HOST dari Edge Config:", e.message);

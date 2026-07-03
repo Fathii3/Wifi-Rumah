@@ -26,9 +26,10 @@ module.exports = async (req, res) => {
             const response = await fetch(process.env.EDGE_CONFIG);
             if (response.ok) {
                 const config = await response.json();
-                if (config.WIFI_SSID) ssid = config.WIFI_SSID;
-                if (config.WIFI_PASSWORD) password = config.WIFI_PASSWORD;
-                if (config.WIFI_ENCRYPTION) encryption = config.WIFI_ENCRYPTION;
+                const items = config.items || {};
+                if (items.WIFI_SSID) ssid = items.WIFI_SSID;
+                if (items.WIFI_PASSWORD) password = items.WIFI_PASSWORD;
+                if (items.WIFI_ENCRYPTION) encryption = items.WIFI_ENCRYPTION;
             }
         } catch (e) {
             console.error("Gagal mengambil data dari Edge Config:", e.message);

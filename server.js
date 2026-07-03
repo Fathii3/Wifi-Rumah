@@ -303,8 +303,20 @@ async function startNgrok() {
 
     console.log("Mendeteksi ngrok_token.txt. Memulai secure tunnel Ngrok secara otomatis...");
 
+    // Cek apakah ada file static domain
+    const domainPath = path.join(__dirname, 'ngrok_domain.txt');
+    let domainArgs = [];
+    if (fs.existsSync(domainPath)) {
+        const domain = fs.readFileSync(domainPath, 'utf8').trim();
+        if (domain) {
+            domainArgs = ['--domain', domain];
+            console.log(`Menggunakan static domain Ngrok: ${domain}`);
+        }
+    }
+
     // Jalankan ngrok menggunakan npx
-    const ngrokProcess = spawn('npx', ['ngrok', 'http', '3000', '--authtoken', token], {
+    const args = ['ngrok', 'http', '3000', '--authtoken', token, ...domainArgs];
+    const ngrokProcess = spawn('npx', args, {
         shell: true
     });
 

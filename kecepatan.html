@@ -215,10 +215,29 @@
     <script src="config.js"></script>
     <script src="app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof wifiConfig !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', async () => {
+            let ssid;
+            // Ambil dari Vercel Serverless API jika diakses online di web HTTPS
+            if (window.location.protocol !== 'file:') {
+                try {
+                    const res = await fetch('/api/wifi-config');
+                    if (res.ok) {
+                        const data = await res.json();
+                        ssid = data.ssid;
+                    }
+                } catch(e) {
+                    console.error("Gagal memuat SSID dari API Vercel:", e);
+                }
+            }
+
+            // Fallback ke config.js lokal
+            if (!ssid && typeof wifiConfig !== 'undefined') {
+                ssid = wifiConfig.ssid;
+            }
+
+            if (ssid) {
                 const wifiEl = document.getElementById('wifi-name-display');
-                if (wifiEl) wifiEl.innerText = wifiConfig.ssid;
+                if (wifiEl) wifiEl.innerText = ssid;
             }
         });
 

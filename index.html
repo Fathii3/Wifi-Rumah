@@ -415,10 +415,32 @@
         // ==========================================
         let isPasswordVisible = false;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof wifiConfig !== 'undefined') {
-                const { ssid, password, encryption } = wifiConfig;
+        document.addEventListener('DOMContentLoaded', async () => {
+            let ssid, password, encryption;
 
+            // Ambil dari Vercel Serverless API jika diakses online di web HTTPS
+            if (window.location.protocol !== 'file:') {
+                try {
+                    const res = await fetch('/api/wifi-config');
+                    if (res.ok) {
+                        const data = await res.json();
+                        ssid = data.ssid;
+                        password = data.password;
+                        encryption = data.encryption;
+                    }
+                } catch(e) {
+                    console.error("Gagal memuat konfigurasi Wi-Fi dari API Vercel:", e);
+                }
+            }
+
+            // Fallback ke config.js lokal jika offline atau file dibuka langsung
+            if (!ssid && typeof wifiConfig !== 'undefined') {
+                ssid = wifiConfig.ssid;
+                password = wifiConfig.password;
+                encryption = wifiConfig.encryption;
+            }
+
+            if (ssid) {
                 document.getElementById('wifi-name-display').innerText = ssid;
 
                 // Generate QR

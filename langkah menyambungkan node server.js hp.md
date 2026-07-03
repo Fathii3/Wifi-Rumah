@@ -143,11 +143,33 @@ echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chrom
 source ~/.bashrc
 ```
 
-### 4. Error: Ngrok stuck di status `reconnecting (failed to ...)`
-Ini terjadi karena sistem Termux Android secara bawaan tidak memiliki konfigurasi DNS standar Linux (`/etc/resolv.conf`), sehingga aplikasi static binary seperti Ngrok gagal mencari alamat DNS server Ngrok di internet.
-**Solusinya:**
-Pasang paket pendukung DNS `resolv-conf` di Termux HP Anda:
-```bash
-pkg install resolv-conf -y
-```
-Setelah terpasang, jalankan kembali program Ngrok atau server Anda.
+### 4. Error: Ngrok stuck di status `reconnecting (failed to ...)` atau `DNS resolution failed`
+Ini terjadi karena sistem Termux Android secara bawaan tidak memiliki konfigurasi pencarian DNS standar Linux (`/etc/resolv.conf`). Aplikasi static binary seperti Ngrok mencari berkas `/etc/resolv.conf` untuk menerjemahkan domain internet, sehingga ia akan gagal terhubung dan stuck dalam loop penyambungan kembali (*reconnecting*).
+
+**Solusinya (Menggunakan proot + termux-chroot):**
+
+1. **Pasang paket `proot` dan `resolv-conf`:**
+   ```bash
+   pkg install proot resolv-conf -y
+   ```
+
+2. **Tulis DNS Google ke dalam konfigurasi resolv-conf Termux:**
+   ```bash
+   echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /data/data/com.termux/files/usr/etc/resolv.conf
+   ```
+
+3. **Masuk ke lingkungan Chroot Linux (Sangat Penting):**
+   Perintah ini akan menyimulasikan direktori `/etc/resolv.conf` standar Linux agar terbaca oleh Ngrok:
+   ```bash
+   termux-chroot
+   ```
+   *(Tampilan terminal Anda mungkin akan sedikit berubah, ini normal).*
+
+4. **Jalankan kembali server Anda dari dalam chroot:**
+   Pastikan Anda berada di folder `Wifi-Rumah`, lalu jalankan:
+   ```bash
+   node server.js
+   ```
+
+Setelah mengikuti langkah-langkah di atas, Ngrok di HP Anda dijamin akan langsung terhubung secara otomatis ke internet, secure tunnel akan aktif, dan data di website Vercel akan langsung tampil dengan sukses secara real-time!
+

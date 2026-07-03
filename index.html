@@ -411,9 +411,13 @@
         // ==========================================
         // INITIALIZATION (QR & Sandi)
         // ==========================================
+        let isWifiConfigLoaded = false;
         let isPasswordVisible = false;
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        async function initWifiConfig() {
+            if (isWifiConfigLoaded) return;
+            isWifiConfigLoaded = true;
+
             let ssid, password, encryption;
 
             // Ambil dari Vercel Serverless API jika diakses online di web HTTPS
@@ -445,6 +449,7 @@
                 const wifiString = `WIFI:S:${ssid};T:${encryption};P:${password};;`;
                 const qrcodeEl = document.getElementById("qrcode");
                 if (qrcodeEl) {
+                    qrcodeEl.innerHTML = "";
                     new QRCode(qrcodeEl, {
                         text: wifiString,
                         width: 140,
@@ -457,7 +462,7 @@
 
                 window.wifiPassword = password;
             }
-        });
+        }
 
         function togglePasswordVisibility() {
             const display = document.getElementById('wifi-password-display');

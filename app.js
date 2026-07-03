@@ -121,6 +121,11 @@ function checkAccessStatus() {
         if (document.getElementById('screen-blocked')) document.getElementById('screen-blocked').classList.add('hidden');
         if (document.getElementById('screen-beranda')) document.getElementById('screen-beranda').classList.remove('hidden');
         
+        // Panggil inisialisasi konfigurasi Wi-Fi jika ada di halaman utama (index.html)
+        if (typeof initWifiConfig === 'function') {
+            initWifiConfig();
+        }
+        
     } else if (status === 'blocked') {
         // If not on index.html, redirect back to index.html to see the blocked screen
         if (!window.location.href.endsWith('index.html') && !window.location.pathname.endsWith('/')) {

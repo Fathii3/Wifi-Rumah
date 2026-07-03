@@ -318,14 +318,21 @@ async function startNgrok() {
         }
     }
 
-    // Jalankan ngrok secara langsung (menggunakan binary ngrok global di sistem)
-    const args = ['http', '3000', '--authtoken', token, ...domainArgs];
-    const ngrokProcess = spawn('ngrok', args, {
+    // Jalankan ngrok menggunakan npx di PC/Windows, atau binary ngrok langsung di Android (Termux)
+    let command = 'npx';
+    let args = ['ngrok', 'http', '3000', '--authtoken', token, ...domainArgs];
+    
+    if (process.platform === 'android') {
+        command = 'ngrok';
+        args = ['http', '3000', '--authtoken', token, ...domainArgs];
+    }
+
+    const ngrokProcess = spawn(command, args, {
         shell: true
     });
 
     ngrokProcess.on('error', (err) => {
-        console.error("⚠️ Gagal menjalankan Ngrok secara otomatis. Pastikan aplikasi 'ngrok' sudah terpasang secara global di sistem/HP Anda. Detail:", err.message);
+        console.error("⚠️ Gagal menjalankan Ngrok secara otomatis. Detail:", err.message);
     });
 
     // Pastikan proses dimatikan ketika aplikasi Node utama ditutup

@@ -32,8 +32,8 @@ Panduan ini berisi langkah-langkah lengkap untuk memasang dan menjalankan backen
 Agar Puppeteer mendeteksi dan menggunakan browser Chromium bawaan HP (bukan mencoba mengunduh versi PC yang tidak kompatibel), jalankan perintah otomatisasi konfigurasi berikut di Termux:
 
 ```bash
-echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' >> ~/.bashrc
-echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium' >> ~/.bashrc
+echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' > ~/.bashrc
+echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium-browser' >> ~/.bashrc
 source ~/.bashrc
 ```
 

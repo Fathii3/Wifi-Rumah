@@ -148,13 +148,14 @@ Ini terjadi karena sistem Termux Android secara bawaan tidak memiliki konfiguras
 
 **Solusinya (Menggunakan proot + termux-chroot):**
 
-1. **Pasang paket `proot` dan `resolv-conf`:**
+1. **Pasang paket `proot` saja (tidak perlu `resolv-conf`):**
    ```bash
-   pkg install proot resolv-conf -y
+   pkg install proot -y
    ```
 
-2. **Tulis DNS Google ke dalam konfigurasi resolv-conf Termux:**
+2. **Buat folder dan tulis DNS Google secara manual di konfigurasi Termux:**
    ```bash
+   mkdir -p /data/data/com.termux/files/usr/etc
    echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /data/data/com.termux/files/usr/etc/resolv.conf
    ```
 

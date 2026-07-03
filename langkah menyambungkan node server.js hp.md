@@ -2,47 +2,81 @@
 
 Panduan ini berisi langkah-langkah lengkap untuk memasang dan menjalankan backend scraper `server.js` di HP Android menggunakan **Termux**, sehingga server dapat aktif 24 jam secara hemat daya tanpa menyalakan laptop.
 
+Setiap perintah sengaja dibuat dalam blok terpisah agar memudahkan Anda menyalinnya satu per satu dari GitHub di HP.
+
 ---
 
 ## 🛠️ Langkah 1: Persiapan Lingkungan di Termux
 
 1. **Unduh dan Pasang Termux yang Selalu Diperbarui:**
-   Jangan unduh Termux dari Google Play Store karena versinya sudah usang dan bermasalah. Unduh dari salah satu link resmi berikut:
+   Jangan unduh Termux dari Google Play Store karena versinya sudah usang. Unduh dari salah satu link resmi berikut:
    * **F-Droid (Direkomendasikan):** Buka [f-droid.org/packages/com.termux/](https://f-droid.org/packages/com.termux/) di HP, gulir ke bawah ke bagian **Version**, lalu klik **Download APK**.
    * **GitHub Releases:** Buka [github.com/termux/termux-app/releases](https://github.com/termux/termux-app/releases), gulir ke bagian **Assets** dari rilis **Latest**, lalu unduh file APK dengan akhiran `universal.apk` atau `arm64-v8a.apk`.
 
 2. **Perbarui Package Manager:**
-   Buka aplikasi Termux lalu ketik perintah berikut:
+   Jalankan perintah berikut satu per satu di Termux HP:
    ```bash
-   pkg update && pkg upgrade -y
+   pkg update -y
+   ```
+   ```bash
+   pkg upgrade -y
    ```
 
-3. **Pasang Repositori X11 & Paket Aplikasi:**
-   Chromium di Termux berada di dalam repositori X11. Jalankan perintah berikut secara berurutan untuk mengaktifkan repositori X11, memperbarui package manager, dan memasang Node.js, Chromium, Git, serta pendukung DNS:
+3. **Pasang Repositori X11 & Aplikasi Pendukung:**
+   Jalankan perintah berikut satu per satu untuk memasang semua bahan yang diperlukan:
    ```bash
    pkg install x11-repo -y
+   ```
+   ```bash
    pkg update
-   pkg install nodejs-lts chromium git which resolv-conf -y
+   ```
+   ```bash
+   pkg install nodejs-lts -y
+   ```
+   ```bash
+   pkg install chromium -y
+   ```
+   ```bash
+   pkg install git -y
+   ```
+   ```bash
+   pkg install which -y
+   ```
+   ```bash
+   pkg install proot -y
    ```
 
 4. **Pasang Ngrok Resmi (Khusus HP ARM64):**
-   Unduh, ekstrak, dan pasang berkas binary Ngrok resmi untuk Linux ARM64 agar dapat dipanggil secara global di Termux HP:
+   Jalankan perintah berikut satu per satu untuk memasang aplikasi Ngrok di HP Android Anda:
    ```bash
    pkg install wget -y
+   ```
+   ```bash
    wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
+   ```
+   ```bash
    tar xvzf ngrok-v3-stable-linux-arm64.tgz
+   ```
+   ```bash
    mv ngrok $PREFIX/bin/
+   ```
+   ```bash
+   chmod +x $PREFIX/bin/ngrok
    ```
 
 ---
 
 ## ⚙️ Langkah 2: Konfigurasi Puppeteer HP
 
-Agar Puppeteer mendeteksi dan menggunakan browser Chromium bawaan HP (bukan mencoba mengunduh versi PC yang tidak kompatibel), jalankan perintah otomatisasi konfigurasi berikut di Termux:
+Jalankan perintah ini satu per satu agar Puppeteer di Node.js menggunakan browser Chromium bawaan HP Termux:
 
 ```bash
 echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' > ~/.bashrc
+```
+```bash
 echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium-browser' >> ~/.bashrc
+```
+```bash
 source ~/.bashrc
 ```
 
@@ -54,6 +88,8 @@ Unduh kode project terbaru Anda langsung dari GitHub ke Termux HP Anda:
 
 ```bash
 git clone https://github.com/Fathii3/Wifi-Rumah.git
+```
+```bash
 cd Wifi-Rumah
 ```
 
@@ -61,7 +97,7 @@ cd Wifi-Rumah
 
 ## 🔒 Langkah 4: Membuat Berkas Token & Domain Ngrok
 
-Karena file token dan domain bersifat rahasia (diabaikan oleh `.gitignore` sehingga tidak ikut ter-upload ke GitHub), Anda harus membuatnya secara manual sekali di Termux HP dengan menjalankan dua perintah berikut:
+Jalankan perintah ini satu per satu di dalam folder `Wifi-Rumah` untuk memasukkan token dan domain statis rahasia Anda secara lokal:
 
 1. **Membuat File Token Ngrok:**
    ```bash
@@ -77,7 +113,7 @@ Karena file token dan domain bersifat rahasia (diabaikan oleh `.gitignore` sehin
 
 ## 🚀 Langkah 5: Menjalankan Server Scraper
 
-Instal library Node.js dan jalankan servernya:
+Jalankan perintah berikut secara berurutan untuk memasang library Node.js dan menjalankan server:
 
 1. **Instal Dependensi:**
    ```bash
@@ -97,7 +133,7 @@ Jika berhasil, Anda akan melihat log bahwa server berjalan di port `3000` dan **
 
 Setelah `node server.js` aktif di Termux HP:
 * **Secara Online (Vercel):**
-  Buka tautan website Vercel Anda di browser HP seperti biasa. Karena kita sudah menghubungkan Edge Config di Vercel, website Vercel Anda akan secara aman dan otomatis langsung terhubung ke HP Termux Anda lewat internet!
+  Buka website Vercel Anda di browser HP seperti biasa. Karena kita sudah menghubungkan Edge Config di Vercel, website Vercel Anda akan secara aman dan otomatis langsung terhubung ke HP Termux Anda lewat internet!
 * **Secara Lokal (Tanpa Internet):**
   Jika Anda sedang tidak ingin menggunakan internet/Vercel, Anda bisa mengakses server lokal Termux langsung dari browser HP Anda:
   ```text
@@ -109,68 +145,62 @@ Setelah `node server.js` aktif di Termux HP:
 ## 🔍 Troubleshooting (Penanganan Masalah Umum)
 
 ### 1. Error: `E: Unable to locate package chromium` atau `The program which is not installed`
-Jika saat instalasi paket aplikasi atau saat menjalankan `source ~/.bashrc` Anda mendapati error tersebut, jalankan perintah ini secara berurutan di Termux untuk memperbarui repositori dan menginstal semua paket pendukung secara lengkap:
+Jalankan perintah berikut satu per satu untuk memulihkan dan menginstal ulang:
 ```bash
 pkg install x11-repo -y
+```
+```bash
 pkg update
-pkg install git nodejs-lts chromium which -y
+```
+```bash
+pkg install git nodejs-lts chromium which proot -y
 ```
 
 ### 2. Error: `fatal: Authentication failed` saat melakukan `git clone`
-Karena repositori Anda bersifat privat, GitHub tidak mengizinkan pengunduhan langsung dengan kata sandi akun biasa. Anda dapat memilih salah satu dari dua solusi berikut:
-
 * **Solusi A: Jadikan Repositori Publik (Sangat Mudah & Praktis)**
-  Karena semua kata sandi Wi-Fi dan token Ngrok Anda sudah disimpan secara aman di Vercel (bukan di dalam repositori GitHub), repositori ini 100% aman untuk diubah menjadi Publik.
   1. Buka repositori `Wifi-Rumah` di browser.
   2. Buka menu **Settings** > scroll ke bawah ke bagian **Danger Zone**.
   3. Klik **Change visibility** > pilih **Make public**.
-  4. Jalankan kembali `git clone https://github.com/Fathii3/Wifi-Rumah.git` di Termux tanpa memerlukan kata sandi.
+  4. Jalankan kembali `git clone` di Termux:
+     ```bash
+     git clone https://github.com/Fathii3/Wifi-Rumah.git
+     ```
 
 * **Solusi B: Gunakan Personal Access Token (PAT) GitHub**
-  Jika ingin repositori tetap privat:
-  1. Di GitHub web, buka **Settings** akun Anda > **Developer Settings** > **Personal access tokens** > **Tokens (classic)**.
-  2. Klik **Generate new token** (classic), isi deskripsi bebas, centang opsi **repo**, dan klik **Generate token**.
-  3. Salin token tersebut. Saat ditanya `Password` oleh Termux waktu `git clone`, tempel (*paste*) token tersebut sebagai pengganti password.
+  1. Buka **Settings** akun GitHub Anda > **Developer Settings** > **Personal access tokens** > **Tokens (classic)**.
+  2. Klik **Generate new token (classic)**, isi deskripsi bebas, centang opsi **repo**, dan klik **Generate token**.
+  3. Salin token tersebut dan tempel (*paste*) sebagai kata sandi saat diminta oleh Termux waktu `git clone`.
 
 ### 3. Error: `Tried to find the browser at the configured path (.../chromium), but no executable was found`
-Ini terjadi karena konfigurasi jalur pencarian browser di `.bashrc` masih mengarah ke berkas `chromium` lama (yang tidak ada), sedangkan di Termux nama berkas eksekusinya adalah `chromium-browser`.
-**Solusinya:**
-Jalankan perintah ini di Termux untuk membersihkan dan memperbarui jalurnya:
+Jalankan perintah berikut satu per satu di Termux untuk memperbarui jalurnya ke file `chromium-browser` yang benar:
 ```bash
 rm -f ~/.bashrc
+```
+```bash
 echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' > ~/.bashrc
+```
+```bash
 echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium-browser' >> ~/.bashrc
+```
+```bash
 source ~/.bashrc
 ```
 
-### 4. Error: Ngrok stuck di status `reconnecting (failed to ...)` atau `DNS resolution failed`
-Ini terjadi karena sistem Termux Android secara bawaan tidak memiliki konfigurasi pencarian DNS standar Linux (`/etc/resolv.conf`). Aplikasi static binary seperti Ngrok mencari berkas `/etc/resolv.conf` untuk menerjemahkan domain internet, sehingga ia akan gagal terhubung dan stuck dalam loop penyambungan kembali (*reconnecting*).
+### 4. Error: Ngrok stuck di status `reconnecting (failed to ...)` atau `DNS resolution failed` / `Unable to locate package resolv-conf`
+Jalankan perintah berikut satu per satu di Termux HP Anda untuk memasang `proot`, membuat DNS Google secara manual, dan menjalankan server lewat chroot:
 
-**Solusinya (Menggunakan proot + termux-chroot):**
-
-1. **Pasang paket `proot` saja (tidak perlu `resolv-conf`):**
-   ```bash
-   pkg install proot -y
-   ```
-
-2. **Buat folder dan tulis DNS Google secara manual di konfigurasi Termux:**
-   ```bash
-   mkdir -p /data/data/com.termux/files/usr/etc
-   echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /data/data/com.termux/files/usr/etc/resolv.conf
-   ```
-
-3. **Masuk ke lingkungan Chroot Linux (Sangat Penting):**
-   Perintah ini akan menyimulasikan direktori `/etc/resolv.conf` standar Linux agar terbaca oleh Ngrok:
-   ```bash
-   termux-chroot
-   ```
-   *(Tampilan terminal Anda mungkin akan sedikit berubah, ini normal).*
-
-4. **Jalankan kembali server Anda dari dalam chroot:**
-   Pastikan Anda berada di folder `Wifi-Rumah`, lalu jalankan:
-   ```bash
-   node server.js
-   ```
-
-Setelah mengikuti langkah-langkah di atas, Ngrok di HP Anda dijamin akan langsung terhubung secara otomatis ke internet, secure tunnel akan aktif, dan data di website Vercel akan langsung tampil dengan sukses secara real-time!
-
+```bash
+pkg install proot -y
+```
+```bash
+mkdir -p /data/data/com.termux/files/usr/etc
+```
+```bash
+echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /data/data/com.termux/files/usr/etc/resolv.conf
+```
+```bash
+termux-chroot
+```
+```bash
+node server.js
+```

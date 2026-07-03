@@ -143,6 +143,7 @@
         </nav>
     </div>
 
+    <script src="config.js"></script>
     <script src="app.js"></script>
     <script>
         let currentDevices = [];
@@ -152,7 +153,8 @@
                 // Ambil data dari server. Gunakan URL kustom jika disimpan di localStorage
                 let apiHost = localStorage.getItem('wifi_backend_api_url');
                 if (!apiHost) {
-                    apiHost = window.location.protocol === 'file:' ? 'http://192.168.1.2:3000' : '';
+                    const defaultApiHost = (typeof wifiConfig !== 'undefined' && wifiConfig.apiHost) ? wifiConfig.apiHost : '';
+                    apiHost = window.location.protocol === 'file:' ? 'http://192.168.1.2:3000' : defaultApiHost;
                 }
                 const response = await fetch(`${apiHost}/api/devices`, {
                     headers: {
@@ -273,10 +275,53 @@
             const btnSave = document.getElementById('btn-save-api');
             const btnReset = document.getElementById('btn-reset-api');
             const inputApiUrl = document.getElementById('input-api-url');
+            const textCurrentUrl = document.getElementById('text-current-api-url');
+            const btnToggleVisibility = document.getElementById('btn-toggle-visibility');
+            const iconVisibility = document.getElementById('icon-visibility');
+
+            function updateCurrentUrlDisplay() {
+                let apiHost = localStorage.getItem('wifi_backend_api_url');
+                const isCustom = !!apiHost;
+                if (!apiHost) {
+                    const defaultApiHost = (typeof wifiConfig !== 'undefined' && wifiConfig.apiHost) ? wifiConfig.apiHost : '';
+                    apiHost = window.location.protocol === 'file:' ? 'http://192.168.1.2:3000' : defaultApiHost;
+                }
+                
+                // Masking URL dengan sensor bintang
+                let maskedUrl = apiHost;
+                if (apiHost) {
+                    try {
+                        const u = new URL(apiHost);
+                        const protocol = u.protocol + '//';
+                        const host = u.hostname;
+                        const parts = host.split('.');
+                        if (parts.length >= 2) {
+                            const sub = parts[0];
+                            const domain = parts.slice(1).join('.');
+                            if (sub.length > 5) {
+                                maskedUrl = protocol + sub.slice(0, 5) + '***' + sub.slice(-2) + '.' + domain;
+                            } else {
+                                maskedUrl = protocol + sub.slice(0, 2) + '***.' + domain;
+                            }
+                        }
+                    } catch(e) {
+                        if (apiHost.length > 12) {
+                            maskedUrl = apiHost.slice(0, 8) + '***' + apiHost.slice(-4);
+                        }
+                    }
+                } else {
+                    maskedUrl = 'Tidak dikonfigurasi';
+                }
+
+                if (textCurrentUrl) {
+                    textCurrentUrl.textContent = maskedUrl + (isCustom ? ' (Kustom)' : ' (Default)');
+                }
+            }
 
             if (btnSettings && modal) {
                 btnSettings.addEventListener('click', () => {
                     inputApiUrl.value = localStorage.getItem('wifi_backend_api_url') || '';
+                    updateCurrentUrlDisplay();
                     modal.classList.remove('hidden');
                 });
             }
@@ -290,6 +335,18 @@
             if (modal) {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) modal.classList.add('hidden');
+                });
+            }
+
+            if (btnToggleVisibility && inputApiUrl) {
+                btnToggleVisibility.addEventListener('click', () => {
+                    if (inputApiUrl.type === 'password') {
+                        inputApiUrl.type = 'text';
+                        iconVisibility.innerHTML = '&#xe8f5;'; // visibility_off
+                    } else {
+                        inputApiUrl.type = 'password';
+                        iconVisibility.innerHTML = '&#xe8f4;'; // visibility
+                    }
                 });
             }
 
@@ -333,13 +390,24 @@
                 </button>
             </div>
             <div class="space-y-4">
+                <div class="bg-black/5 dark:bg-white/5 p-3 rounded-xl border border-black/5 dark:border-white/5 space-y-1">
+                    <span class="text-[10px] font-bold text-on-surface-variant dark:text-white/60 uppercase">URL Terhubung Saat Ini:</span>
+                    <div class="font-mono text-xs text-primary dark:text-blue-400 break-all" id="text-current-api-url">
+                        -
+                    </div>
+                </div>
                 <p class="text-xs text-on-surface-variant dark:text-white/60 leading-relaxed">
-                    Jika website di-host di Vercel (HTTPS), browser memblokir koneksi HTTP lokal. Masukkan URL HTTPS dari secure tunnel (seperti Ngrok, Pinggy, atau Localtunnel) di sini. Kosongkan untuk menggunakan default.
+                    Jika website di-host di Vercel (HTTPS), browser memblokir koneksi HTTP lokal. Masukkan URL HTTPS dari secure tunnel (seperti Ngrok, Pinggy, atau Localtunnel) di bawah ini untuk mengubahnya.
                 </p>
                 <div class="space-y-1">
                     <label for="input-api-url" class="text-xs font-bold text-on-surface-variant dark:text-white/60 uppercase">URL API Backend</label>
-                    <input type="text" id="input-api-url" placeholder="Contoh: https://xxxx.ngrok-free.app" 
-                           class="w-full px-4 py-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:border-primary font-mono text-on-surface dark:text-white" />
+                    <div class="relative flex items-center">
+                        <input type="password" id="input-api-url" placeholder="Contoh: https://xxxx.ngrok-free.app" 
+                               class="w-full pl-4 pr-10 py-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:border-primary font-mono text-on-surface dark:text-white" />
+                        <button type="button" id="btn-toggle-visibility" class="absolute right-3 text-on-surface-variant dark:text-white/60 hover:text-primary transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[18px]" id="icon-visibility">&#xe8f4;</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button id="btn-reset-api" class="px-4 py-2 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-on-surface-variant dark:text-white/80 text-sm font-semibold rounded-full transition-all">

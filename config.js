@@ -2,5 +2,6 @@
 const wifiConfig = {
     ssid: "Wifi-Rumah",
     password: "Rumah321@",
-    encryption: "WPA"
+    encryption: "WPA",
+    apiHost: "https://collapse-blot-curtsy.ngrok-free.dev"
 };

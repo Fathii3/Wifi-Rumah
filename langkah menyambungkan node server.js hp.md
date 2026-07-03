@@ -122,3 +122,14 @@ Karena repositori Anda bersifat privat, GitHub tidak mengizinkan pengunduhan lan
   1. Di GitHub web, buka **Settings** akun Anda > **Developer Settings** > **Personal access tokens** > **Tokens (classic)**.
   2. Klik **Generate new token** (classic), isi deskripsi bebas, centang opsi **repo**, dan klik **Generate token**.
   3. Salin token tersebut. Saat ditanya `Password` oleh Termux waktu `git clone`, tempel (*paste*) token tersebut sebagai pengganti password.
+
+### 3. Error: `Tried to find the browser at the configured path (.../chromium), but no executable was found`
+Ini terjadi karena konfigurasi jalur pencarian browser di `.bashrc` masih mengarah ke berkas `chromium` lama (yang tidak ada), sedangkan di Termux nama berkas eksekusinya adalah `chromium-browser`.
+**Solusinya:**
+Jalankan perintah ini di Termux untuk membersihkan dan memperbarui jalurnya:
+```bash
+rm -f ~/.bashrc
+echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' > ~/.bashrc
+echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium-browser' >> ~/.bashrc
+source ~/.bashrc
+```

@@ -54,6 +54,40 @@ async function detectISP() {
 // ==========================================
 // LOGIKA AKSES & BLOKIR 1 HARI
 // ==========================================
+let blockedTimerInterval = null;
+
+function startBlockedCountdown(blockedTimestamp) {
+    if (blockedTimerInterval) clearInterval(blockedTimerInterval);
+    
+    const timerElement = document.getElementById('blocked-timer');
+    if (!timerElement) return;
+
+    function updateTimer() {
+        const now = Date.now();
+        const blockDuration = 86400000; // 24 Jam
+        const expiryTime = parseInt(blockedTimestamp) + blockDuration;
+        const timeLeft = expiryTime - now;
+
+        if (timeLeft <= 0) {
+            clearInterval(blockedTimerInterval);
+            blockedTimerInterval = null;
+            localStorage.removeItem('wifi_access_status');
+            localStorage.removeItem('wifi_access_time');
+            checkAccessStatus();
+            return;
+        }
+
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        timerElement.innerHTML = `Silakan coba lagi dalam <strong class="text-error font-bold">${hours} jam ${minutes} menit ${seconds} detik</strong><br>atau hubungi pemilik rumah secara langsung.`;
+    }
+
+    updateTimer();
+    blockedTimerInterval = setInterval(updateTimer, 1000);
+}
+
 function checkAccessStatus() {
     const status = localStorage.getItem('wifi_access_status');
     const timestamp = localStorage.getItem('wifi_access_time');
@@ -65,6 +99,10 @@ function checkAccessStatus() {
         if (diff > 86400000) {
             localStorage.removeItem('wifi_access_status');
             localStorage.removeItem('wifi_access_time');
+            if (blockedTimerInterval) {
+                clearInterval(blockedTimerInterval);
+                blockedTimerInterval = null;
+            }
             // Redirect to intro if not already there
             if (!window.location.href.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
                 window.location.href = 'index.html';
@@ -74,6 +112,10 @@ function checkAccessStatus() {
     }
 
     if (status === 'granted') {
+        if (blockedTimerInterval) {
+            clearInterval(blockedTimerInterval);
+            blockedTimerInterval = null;
+        }
         // Hide intro/blocked screens if on index.html
         if (document.getElementById('screen-intro')) document.getElementById('screen-intro').classList.add('hidden');
         if (document.getElementById('screen-blocked')) document.getElementById('screen-blocked').classList.add('hidden');
@@ -87,8 +129,13 @@ function checkAccessStatus() {
             if (document.getElementById('screen-intro')) document.getElementById('screen-intro').classList.add('hidden');
             if (document.getElementById('screen-beranda')) document.getElementById('screen-beranda').classList.add('hidden');
             if (document.getElementById('screen-blocked')) document.getElementById('screen-blocked').classList.remove('hidden');
+            startBlockedCountdown(timestamp);
         }
     } else {
+        if (blockedTimerInterval) {
+            clearInterval(blockedTimerInterval);
+            blockedTimerInterval = null;
+        }
         // No status, must be on intro
         if (!window.location.href.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
             window.location.href = 'index.html';

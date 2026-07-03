@@ -18,11 +18,11 @@ Panduan ini berisi langkah-langkah lengkap untuk memasang dan menjalankan backen
    ```
 
 3. **Pasang Repositori X11 & Paket Aplikasi:**
-   Chromium di Termux berada di dalam repositori X11. Jalankan perintah berikut secara berurutan untuk mengaktifkan repositori X11, memperbarui package manager, dan memasang Node.js, Chromium, serta Git:
+   Chromium di Termux berada di dalam repositori X11. Jalankan perintah berikut secara berurutan untuk mengaktifkan repositori X11, memperbarui package manager, dan memasang Node.js, Chromium, Git, serta pendukung DNS:
    ```bash
    pkg install x11-repo -y
    pkg update
-   pkg install nodejs-lts chromium git which -y
+   pkg install nodejs-lts chromium git which resolv-conf -y
    ```
 
 4. **Pasang Ngrok Resmi (Khusus HP ARM64):**
@@ -142,3 +142,12 @@ echo 'export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true' > ~/.bashrc
 echo 'export PUPPETEER_EXECUTABLE_PATH=/data/data/com.termux/files/usr/bin/chromium-browser' >> ~/.bashrc
 source ~/.bashrc
 ```
+
+### 4. Error: Ngrok stuck di status `reconnecting (failed to ...)`
+Ini terjadi karena sistem Termux Android secara bawaan tidak memiliki konfigurasi DNS standar Linux (`/etc/resolv.conf`), sehingga aplikasi static binary seperti Ngrok gagal mencari alamat DNS server Ngrok di internet.
+**Solusinya:**
+Pasang paket pendukung DNS `resolv-conf` di Termux HP Anda:
+```bash
+pkg install resolv-conf -y
+```
+Setelah terpasang, jalankan kembali program Ngrok atau server Anda.

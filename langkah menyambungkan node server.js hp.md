@@ -94,3 +94,31 @@ Setelah `node server.js` aktif di Termux HP:
   ```text
   http://localhost:3000/perangkat.html
   ```
+
+---
+
+## 🔍 Troubleshooting (Penanganan Masalah Umum)
+
+### 1. Error: `E: Unable to locate package chromium` atau `The program which is not installed`
+Jika saat instalasi paket aplikasi atau saat menjalankan `source ~/.bashrc` Anda mendapati error tersebut, jalankan perintah ini secara berurutan di Termux untuk memperbarui repositori dan menginstal semua paket pendukung secara lengkap:
+```bash
+pkg install x11-repo -y
+pkg update
+pkg install git nodejs-lts chromium which -y
+```
+
+### 2. Error: `fatal: Authentication failed` saat melakukan `git clone`
+Karena repositori Anda bersifat privat, GitHub tidak mengizinkan pengunduhan langsung dengan kata sandi akun biasa. Anda dapat memilih salah satu dari dua solusi berikut:
+
+* **Solusi A: Jadikan Repositori Publik (Sangat Mudah & Praktis)**
+  Karena semua kata sandi Wi-Fi dan token Ngrok Anda sudah disimpan secara aman di Vercel (bukan di dalam repositori GitHub), repositori ini 100% aman untuk diubah menjadi Publik.
+  1. Buka repositori `Wifi-Rumah` di browser.
+  2. Buka menu **Settings** > scroll ke bawah ke bagian **Danger Zone**.
+  3. Klik **Change visibility** > pilih **Make public**.
+  4. Jalankan kembali `git clone https://github.com/Fathii3/Wifi-Rumah.git` di Termux tanpa memerlukan kata sandi.
+
+* **Solusi B: Gunakan Personal Access Token (PAT) GitHub**
+  Jika ingin repositori tetap privat:
+  1. Di GitHub web, buka **Settings** akun Anda > **Developer Settings** > **Personal access tokens** > **Tokens (classic)**.
+  2. Klik **Generate new token** (classic), isi deskripsi bebas, centang opsi **repo**, dan klik **Generate token**.
+  3. Salin token tersebut. Saat ditanya `Password` oleh Termux waktu `git clone`, tempel (*paste*) token tersebut sebagai pengganti password.

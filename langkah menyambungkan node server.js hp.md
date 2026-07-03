@@ -17,9 +17,11 @@ Panduan ini berisi langkah-langkah lengkap untuk memasang dan menjalankan backen
    pkg update && pkg upgrade -y
    ```
 
-3. **Pasang Node.js, Chromium, dan Git:**
-   Chromium diperlukan oleh Puppeteer agar bisa melakukan scraping web router secara headless (tanpa GUI) di dalam HP Anda.
+3. **Pasang Repositori X11 & Paket Aplikasi:**
+   Chromium di Termux berada di dalam repositori X11. Jalankan perintah berikut secara berurutan untuk mengaktifkan repositori X11, memperbarui package manager, dan memasang Node.js, Chromium, serta Git:
    ```bash
+   pkg install x11-repo -y
+   pkg update
    pkg install nodejs-lts chromium git -y
    ```
 

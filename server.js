@@ -287,8 +287,84 @@ app.get('/api/devices', (req, res) => {
     }
 });
 
+// Fungsi untuk menjalankan secure tunnel Ngrok secara otomatis jika file token ditemukan
+async function startNgrok() {
+    const { spawn } = require('child_process');
+    const fs = require('fs');
+    const path = require('path');
+
+    const tokenPath = path.join(__dirname, 'ngrok_token.txt');
+    if (!fs.existsSync(tokenPath)) {
+        return;
+    }
+    
+    const token = fs.readFileSync(tokenPath, 'utf8').trim();
+    if (!token) return;
+
+    console.log("Mendeteksi ngrok_token.txt. Memulai secure tunnel Ngrok secara otomatis...");
+
+    // Jalankan ngrok menggunakan npx
+    const ngrokProcess = spawn('npx', ['ngrok', 'http', '3000', '--authtoken', token], {
+        shell: true
+    });
+
+    ngrokProcess.on('error', (err) => {
+        console.error("Gagal menjalankan Ngrok:", err.message);
+    });
+
+    // Pastikan proses dimatikan ketika aplikasi Node utama ditutup
+    process.on('exit', () => ngrokProcess.kill());
+    process.on('SIGINT', () => {
+        ngrokProcess.kill();
+        process.exit();
+    });
+    process.on('SIGTERM', () => {
+        ngrokProcess.kill();
+        process.exit();
+    });
+
+    // Berikan waktu 4 detik bagi Ngrok untuk terhubung
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    // Ambil URL publik dari REST API lokal Ngrok
+    try {
+        const response = await fetch('http://127.0.0.1:4040/api/tunnels');
+        if (response.ok) {
+            const data = await response.json();
+            const httpsTunnel = data.tunnels.find(t => t.proto === 'https');
+            if (httpsTunnel) {
+                console.log("\n========================================================");
+                console.log(`🚀 NGROK TUNNEL BERHASIL AKTIF SECARA OTOMATIS!`);
+                console.log(`Tautan HTTPS Anda: ${httpsTunnel.public_url}`);
+                console.log(`Silakan masukkan tautan di atas pada tombol Pengaturan (⚙️) di web Vercel Anda.`);
+                console.log("========================================================\n");
+            }
+        }
+    } catch (e) {
+        console.log("Mencoba ulang mengambil URL Ngrok...");
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        try {
+            const response = await fetch('http://127.0.0.1:4040/api/tunnels');
+            if (response.ok) {
+                const data = await response.json();
+                const httpsTunnel = data.tunnels.find(t => t.proto === 'https');
+                if (httpsTunnel) {
+                    console.log("\n========================================================");
+                    console.log(`🚀 NGROK TUNNEL BERHASIL AKTIF SECARA OTOMATIS!`);
+                    console.log(`Tautan HTTPS Anda: ${httpsTunnel.public_url}`);
+                    console.log(`Silakan masukkan tautan di atas pada tombol Pengaturan (⚙️) di web Vercel Anda.`);
+                    console.log("========================================================\n");
+                }
+            }
+        } catch (err) {
+            console.error("Gagal mendapatkan URL publik dari Ngrok API lokal:", err.message);
+        }
+    }
+}
+
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Backend Server berjalan di http://localhost:${PORT}`);
     console.log(`Web Statis Anda sekarang bisa memanggil API ini untuk mendapatkan data Real-Time dari Router!`);
+    startNgrok();
 });

@@ -54,19 +54,18 @@ Localtunnel juga gratis dan tidak memerlukan registrasi token.
 
 ---
 
-### Cara C: Menggunakan Ngrok (Sangat Stabil)
-Ngrok adalah opsi terpopuler tetapi memerlukan registrasi akun gratis.
+### Cara C: Menggunakan Ngrok (Otomatis & Sangat Stabil)
+Ngrok adalah opsi terpopuler. Kami telah menambahkan fitur **otomatisasi Ngrok** di dalam `server.js`.
 
-1. Unduh dan daftarkan akun di [ngrok.com](https://ngrok.com/).
-2. Konfigurasikan token ngrok Anda di terminal (hanya sekali):
+1. Daftarkan akun di [ngrok.com](https://ngrok.com/) untuk mendapatkan token Anda.
+2. Buat file bernama `ngrok_token.txt` di folder project Anda dan tempel token Anda di sana (file ini sudah otomatis kami abaikan di `.gitignore` agar tidak ter-upload ke publik).
+3. Jalankan server:
    ```bash
-   ngrok config add-authtoken <TOKEN_ANDA>
+   node server.js
    ```
-3. Jalankan server lokal (`node server.js`), lalu jalankan ngrok:
-   ```bash
-   ngrok http 3000
-   ```
-4. Salin URL HTTPS yang dihasilkan (`https://xxxx.ngrok-free.app`), lalu masukkan ke tombol **⚙️** di halaman Vercel Anda.
+4. Server secara otomatis akan memicu secure tunnel Ngrok dan mencetak tautan HTTPS di layar terminal Anda, seperti:
+   `https://a1b2-111-222-33-44.ngrok-free.app`
+5. Salin tautan HTTPS tersebut, buka web Vercel Anda, klik tombol Gigi **⚙️**, tempel URL tersebut, lalu simpan.
 
 ---
 

@@ -379,17 +379,15 @@
     <!-- Verification Popup Overlay -->
     <div id="verify-popup"
         class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 bg-background/60 backdrop-blur-sm">
-        <div
-            class="glass-panel-high rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl border-t-4 border-t-secondary">
-            <h3 class="font-headline-md mb-2 text-xl">Konfirmasi</h3>
-            <p class="font-body-md text-sm text-on-surface mb-2 font-semibold" id="verify-main-msg">Tindakan</p>
-            <p class="font-body-md text-xs text-on-surface-variant mb-6" id="verify-sub-msg">Keterangan</p>
-            <div class="flex gap-3 justify-center">
+        <div class="glass-panel-high rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl">
+            <h3 class="font-headline-md mb-4 text-xl" id="verify-title">Konfirmasi</h3>
+            <p class="font-body-md text-sm text-on-surface-variant mb-6" id="verify-text">Keterangan</p>
+            <div class="flex gap-3 mt-2">
                 <button
-                    class="flex-1 bg-surface-container-high hover:bg-surface-variant text-on-surface font-semibold py-3 rounded-xl transition-colors"
+                    class="flex-1 bg-surface-container-high hover:bg-surface-variant text-on-surface font-semibold py-3 rounded-xl transition-all"
                     onclick="closeVerifyPopup()">Batal</button>
                 <button
-                    class="flex-1 bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-container transition-colors shadow-lg shadow-primary/20"
+                    class="flex-1 bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-container transition-all shadow-lg shadow-primary/20"
                     onclick="proceedAction()">Lanjut</button>
             </div>
         </div>
@@ -479,15 +477,15 @@
 
         function verifyAction(actionType) {
             pendingAction = actionType;
-            const mainMsg = document.getElementById('verify-main-msg');
-            const subMsg = document.getElementById('verify-sub-msg');
+            const verifyTitle = document.getElementById('verify-title');
+            const verifyText = document.getElementById('verify-text');
 
             if (actionType === 'scanner') {
-                mainMsg.innerText = "Buka Scanner?";
-                subMsg.innerText = "Pastikan Anda sudah menyimpan QR Code ke galeri. Jika sudah, silakan Lanjut untuk membuka Google Lens/Scanner.";
+                verifyTitle.innerText = "Buka Scanner?";
+                verifyText.innerText = "Pastikan Anda sudah menyimpan QR Code ke galeri. Jika sudah, silakan Lanjut untuk membuka Google Lens/Scanner.";
             } else if (actionType === 'wifi') {
-                mainMsg.innerText = "Buka Pengaturan Wi-Fi?";
-                subMsg.innerText = "Pastikan Anda sudah menyalin kata sandi agar bisa ditempel. Lanjut untuk membuka pengaturan jaringan.";
+                verifyTitle.innerText = "Buka Pengaturan Wi-Fi?";
+                verifyText.innerText = "Pastikan Anda sudah menyalin kata sandi agar bisa ditempel. Lanjut untuk membuka pengaturan jaringan.";
             }
 
             document.getElementById('verify-popup').classList.remove('hidden');

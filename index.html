@@ -569,15 +569,10 @@
         }
 
         function executeScanner() {
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            if (/android/i.test(ua)) {
-                window.location.href = "intent:#Intent;package=com.google.android.googlequicksearchbox;end";
-            } else {
-                showAlert("Info Google Lens", "Membuka Google... Silakan ketuk ikon Kamera (Lens) untuk memindai gambar QR.");
-                setTimeout(() => {
-                    window.location.href = "https://www.google.com";
-                }, 2500);
-            }
+            showAlert("Info Google Lens", "Membuka Google... Silakan ketuk ikon Kamera (Lens) untuk memindai gambar QR.");
+            setTimeout(() => {
+                window.location.href = "https://www.google.com";
+            }, 2500);
         }
     </script>
 </body>

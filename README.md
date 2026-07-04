@@ -13,7 +13,7 @@ Berikut adalah link portal beserta kredensial login (dibuat dalam kotak agar mud
 
 **Link Portal:**
 ```text
-http://192.168.1.1/admin/login.asp
+http://192.168HSGQ.1.1/admin/login.asp
 ```
 
 **Username:**

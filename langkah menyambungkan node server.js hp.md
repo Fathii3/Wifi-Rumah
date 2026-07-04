@@ -146,6 +146,37 @@ Jika berhasil, Anda akan melihat log bahwa server berjalan di port `3000` dan **
 
 ---
 
+## 🔁 Cara Cepat Menjalankan Kembali di Hari Berikutnya (Tanpa Install Ulang)
+
+Jika Anda sudah pernah mengikuti langkah-langkah di atas sampai selesai dan sukses, **Anda tidak perlu menginstal ulang apa pun** besok atau di hari-hari berikutnya. 
+
+Cukup buka aplikasi **Termux** di HP Anda, lalu jalankan perintah singkat berikut secara berurutan:
+
+1. **Masuk ke lingkungan Chroot (Wajib agar internet Ngrok lancar):**
+   ```bash
+   termux-chroot
+   ```
+
+2. **Masuk ke folder project:**
+   ```bash
+   cd ~/Wifi-Rumah
+   ```
+
+3. **(Opsional) Ambil pembaruan kode terbaru:**
+   *Jika Anda ada mengubah/mengedit kode project di laptop dan sudah mengunggahnya (push) ke GitHub, jalankan perintah ini untuk memperbarui file di HP:*
+   ```bash
+   git pull
+   ```
+
+4. **Jalankan server kembali:**
+   ```bash
+   node server.js
+   ```
+
+Hanya dengan **3-4 baris perintah sederhana** tersebut, server Anda sudah kembali aktif dan berjalan dengan domain Ngrok statis Anda!
+
+---
+
 ## 🌐 Langkah 6: Mengakses Web Pemantau Perangkat
 
 Setelah `node server.js` aktif di Termux HP:

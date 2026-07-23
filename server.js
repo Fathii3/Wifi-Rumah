@@ -22,11 +22,35 @@ async function scrapeRouter() {
         try {
             // Otomatis headless jika berjalan di Android (Termux) agar tidak error GUI
             const isHeadless = process.platform === 'android' || process.env.HEADLESS === 'true';
-            browser = await puppeteer.launch({ 
+            const fs = require('fs');
+            const winChromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+            
+            const launchOptions = {
                 headless: isHeadless, 
                 defaultViewport: null,
                 args: ['--no-sandbox', '--disable-setuid-sandbox'] // Diperlukan untuk lingkungan Termux/Linux
-            });
+            };
+
+            if (process.platform === 'win32' && fs.existsSync(winChromePath)) {
+                launchOptions.executablePath = winChromePath;
+            } else if (process.env.PUPPETEER_EXECUTABLE_PATH && fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
+                launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+            } else {
+                const termuxPaths = [
+                    '/data/data/com.termux/files/usr/bin/chromium-browser',
+                    '/data/data/com.termux/files/usr/bin/chromium',
+                    '/usr/bin/chromium-browser',
+                    '/usr/bin/chromium'
+                ];
+                for (const tPath of termuxPaths) {
+                    if (fs.existsSync(tPath)) {
+                        launchOptions.executablePath = tPath;
+                        break;
+                    }
+                }
+            }
+
+            browser = await puppeteer.launch(launchOptions);
             const page = await browser.newPage();
             
             // Meneruskan log dari dalam browser ke terminal Node.js Anda

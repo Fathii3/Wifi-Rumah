@@ -1,8 +1,5 @@
-// Serverless Function untuk Vercel (Mengambil Konfigurasi Wi-Fi secara aman)
-// Berkas ini berjalan di backend Vercel, sehingga aman dari F12.
-
+// Serverless Function Vercel (Konfigurasi Wi-Fi Backend)
 module.exports = async (req, res) => {
-    // Izinkan CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -20,7 +17,6 @@ module.exports = async (req, res) => {
     let password = "Rumah321@";
     let encryption = "WPA";
 
-    // 1. Coba ambil dari Vercel Edge Config jika tersedia
     if (process.env.EDGE_CONFIG) {
         try {
             const response = await fetch(process.env.EDGE_CONFIG);
@@ -32,11 +28,9 @@ module.exports = async (req, res) => {
                 if (items.WIFI_ENCRYPTION) encryption = items.WIFI_ENCRYPTION;
             }
         } catch (e) {
-            console.error("Gagal mengambil data dari Edge Config:", e.message);
+            console.error("Gagal Edge Config:", e.message);
         }
-    } 
-    // 2. Fallback ke Environment Variables biasa jika Edge Config tidak aktif/gagal
-    else {
+    } else {
         if (process.env.WIFI_SSID) ssid = process.env.WIFI_SSID;
         if (process.env.WIFI_PASSWORD) password = process.env.WIFI_PASSWORD;
         if (process.env.WIFI_ENCRYPTION) encryption = process.env.WIFI_ENCRYPTION;

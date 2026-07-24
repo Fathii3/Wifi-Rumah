@@ -1,6 +1,4 @@
-// ==========================================
-// DETEKSI PROVIDER ISP
-// ==========================================
+// Deteksi Provider ISP
 function formatISPName(rawName) {
     if (!rawName) return "Jaringan Lokal";
     const name = rawName.toLowerCase();
@@ -18,7 +16,6 @@ function formatISPName(rawName) {
     if (name.includes("smartfren")) return "Smartfren";
     if (name.includes("indonesia comnets plus") || name.includes("icon")) return "ICONNET";
     
-    // Kembalikan nama aslinya jika tidak masuk daftar di atas
     return rawName;
 }
 
@@ -35,25 +32,25 @@ async function detectISP() {
         const data = await response.json();
         
         if (data.success) {
-            let ispName = data.connection.isp || data.connection.org || "Jaringan Lokal";
-            ispName = formatISPName(ispName);
-            
+            let ispName = formatISPName(data.connection.isp || data.connection.org || "Jaringan Lokal");
             const cityName = data.city || "Lokasi Tidak Diketahui";
             ispElements.forEach(el => { removeSkeleton(el); el.innerText = ispName; });
             cityElements.forEach(el => { removeSkeleton(el); el.innerText = cityName; });
         } else {
-            throw new Error("API tidak berhasil merespons data ISP.");
+            throw new Error("API ISP error");
         }
     } catch (error) {
-        console.log("Gagal mendeteksi ISP:", error);
         ispElements.forEach(el => { removeSkeleton(el); el.innerText = "Tidak Terdeteksi"; });
         cityElements.forEach(el => { removeSkeleton(el); el.innerText = "-"; });
     }
 }
 
-// ==========================================
-// LOGIKA AKSES & BLOKIR 1 HARI
-// ==========================================
+function isHomePage() {
+    const path = window.location.pathname;
+    return path === '' || path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path.endsWith('index.html');
+}
+
+// Logika Akses & Blokir 1 Hari
 let blockedTimerInterval = null;
 
 function startBlockedCountdown(blockedTimestamp) {
@@ -64,7 +61,7 @@ function startBlockedCountdown(blockedTimestamp) {
 
     function updateTimer() {
         const now = Date.now();
-        const blockDuration = 86400000; // 24 Jam
+        const blockDuration = 86400000;
         const expiryTime = parseInt(blockedTimestamp) + blockDuration;
         const timeLeft = expiryTime - now;
 
@@ -92,7 +89,6 @@ function checkAccessStatus() {
     const status = localStorage.getItem('wifi_access_status');
     const timestamp = localStorage.getItem('wifi_access_time');
     
-    // Cek masa berlaku 1 hari (24 * 60 * 60 * 1000 = 86400000 ms)
     if (timestamp) {
         const now = Date.now();
         const diff = now - parseInt(timestamp);
@@ -103,37 +99,37 @@ function checkAccessStatus() {
                 clearInterval(blockedTimerInterval);
                 blockedTimerInterval = null;
             }
-            // Redirect to intro if not already there
-            if (!window.location.href.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
+            if (!isHomePage()) {
                 window.location.href = 'index.html';
             }
             return;
         }
     }
 
+    const screenIntro = document.getElementById('screen-intro');
+    const screenBeranda = document.getElementById('screen-beranda');
+    const screenBlocked = document.getElementById('screen-blocked');
+
     if (status === 'granted') {
         if (blockedTimerInterval) {
             clearInterval(blockedTimerInterval);
             blockedTimerInterval = null;
         }
-        // Hide intro/blocked screens if on index.html
-        if (document.getElementById('screen-intro')) document.getElementById('screen-intro').classList.add('hidden');
-        if (document.getElementById('screen-blocked')) document.getElementById('screen-blocked').classList.add('hidden');
-        if (document.getElementById('screen-beranda')) document.getElementById('screen-beranda').classList.remove('hidden');
+        if (screenIntro) screenIntro.classList.add('hidden');
+        if (screenBlocked) screenBlocked.classList.add('hidden');
+        if (screenBeranda) screenBeranda.classList.remove('hidden');
         
-        // Panggil inisialisasi konfigurasi Wi-Fi jika ada di halaman utama (index.html)
         if (typeof initWifiConfig === 'function') {
             initWifiConfig();
         }
         
     } else if (status === 'blocked') {
-        // If not on index.html, redirect back to index.html to see the blocked screen
-        if (!window.location.href.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
+        if (!isHomePage()) {
             window.location.href = 'index.html';
         } else {
-            if (document.getElementById('screen-intro')) document.getElementById('screen-intro').classList.add('hidden');
-            if (document.getElementById('screen-beranda')) document.getElementById('screen-beranda').classList.add('hidden');
-            if (document.getElementById('screen-blocked')) document.getElementById('screen-blocked').classList.remove('hidden');
+            if (screenIntro) screenIntro.classList.add('hidden');
+            if (screenBeranda) screenBeranda.classList.add('hidden');
+            if (screenBlocked) screenBlocked.classList.remove('hidden');
             startBlockedCountdown(timestamp);
         }
     } else {
@@ -141,13 +137,12 @@ function checkAccessStatus() {
             clearInterval(blockedTimerInterval);
             blockedTimerInterval = null;
         }
-        // No status, must be on intro
-        if (!window.location.href.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
+        if (!isHomePage()) {
             window.location.href = 'index.html';
         } else {
-            if (document.getElementById('screen-intro')) document.getElementById('screen-intro').classList.remove('hidden');
-            if (document.getElementById('screen-beranda')) document.getElementById('screen-beranda').classList.add('hidden');
-            if (document.getElementById('screen-blocked')) document.getElementById('screen-blocked').classList.add('hidden');
+            if (screenIntro) screenIntro.classList.remove('hidden');
+            if (screenBeranda) screenBeranda.classList.add('hidden');
+            if (screenBlocked) screenBlocked.classList.add('hidden');
         }
     }
 }
@@ -160,7 +155,7 @@ function handleContinue() {
     const content = document.getElementById('modal-content');
     
     const existingActions = document.getElementById('modal-actions');
-    if(existingActions) existingActions.remove();
+    if (existingActions) existingActions.remove();
 
     modal.classList.remove('hidden');
     spinner.classList.remove('hidden');
@@ -197,35 +192,36 @@ function blockAccess() {
     checkAccessStatus();
 }
 
-// ==========================================
-// ACTIVE NAVBAR SYNC
-// ==========================================
+// Active Navbar Sync
 function updateActiveNav() {
     const currentPath = window.location.pathname;
     document.querySelectorAll('.nav-btn').forEach(btn => {
         const target = btn.getAttribute('href');
         if (!target) return;
         
-        // Simple logic to highlight active tab
-        if (currentPath.includes(target) || (target === 'index.html' && currentPath.endsWith('/'))) {
+        if (currentPath.includes(target) || (target === 'index.html' && (currentPath.endsWith('/') || currentPath === ''))) {
             btn.classList.add('text-primary', 'scale-110');
             btn.classList.remove('text-on-surface-variant');
             const icon = btn.querySelector('span:first-child');
-            if(icon) icon.style.fontVariationSettings = "'FILL' 1";
+            if (icon) icon.style.fontVariationSettings = "'FILL' 1";
         } else {
             btn.classList.remove('text-primary', 'scale-110');
             btn.classList.add('text-on-surface-variant');
             const icon = btn.querySelector('span:first-child');
-            if(icon) icon.style.fontVariationSettings = "'FILL' 0";
+            if (icon) icon.style.fontVariationSettings = "'FILL' 0";
         }
     });
 }
 
-// ==========================================
-// RUN ON LOAD
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+// Inisialisasi Aplikasi
+function initApp() {
     checkAccessStatus();
     updateActiveNav();
     detectISP();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}

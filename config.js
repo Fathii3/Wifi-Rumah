@@ -1,5 +1,4 @@
-// File config.js lokal (untuk penggunaan offline/file:///)
-// Kata sandi asli di Vercel aman disimpan di Environment Variables.
+// Konfigurasi Wi-Fi Lokal
 const wifiConfig = {
     ssid: "Wifi-Rumah-Lokal",
     password: "PasswordLokal123",

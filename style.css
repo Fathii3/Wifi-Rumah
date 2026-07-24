@@ -38,15 +38,8 @@
 }
 
 @keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
 
 .animate-float {
@@ -54,20 +47,18 @@
 }
 
 .material-symbols-outlined {
-    font-family: 'Material Symbols Rounded'; /* Use softer rounded shapes */
+    font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     display: inline-block;
     vertical-align: middle;
-    
-    /* Real SVG Liquid Glass filter (creates 3D gel/glass gloss) */
     filter: url(#liquid-glass);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy fluid transition */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .nav-btn:hover .material-symbols-outlined,
 button:hover .material-symbols-outlined {
     filter: url(#liquid-glass) brightness(1.25) drop-shadow(0 0 8px currentColor);
-    transform: scale(1.15) rotate(2deg); /* Organic tilt and zoom */
+    transform: scale(1.15) rotate(2deg);
 }
 
 .btn-hover-effect {
@@ -78,7 +69,6 @@ button:hover .material-symbols-outlined {
     transform: scale(0.96);
 }
 
-/* Gauge styles */
 .gauge-svg {
     transform: rotate(-90deg);
 }

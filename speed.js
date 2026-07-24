@@ -1,5 +1,4 @@
 // speed.js - Logika Pengukur Kecepatan (Speed Test)
-
 let isTesting = false;
 let animationFrameId = null;
 let currentDisplayedSpeed = 0;
@@ -7,20 +6,13 @@ let targetSpeed = 0;
 let pingTimeoutId = null;
 
 function animateSpeed() {
-    // Interpolasi halus
     if (Math.abs(currentDisplayedSpeed - targetSpeed) > 0.1) {
         currentDisplayedSpeed += (targetSpeed - currentDisplayedSpeed) * 0.1;
     } else {
-        // Tambahkan efek getaran halus (jitter) jika sedang tes
-        if (isTesting && targetSpeed > 0) {
-            currentDisplayedSpeed = targetSpeed + (Math.random() * 0.2 - 0.1);
-        } else {
-            currentDisplayedSpeed = targetSpeed;
-        }
+        currentDisplayedSpeed = isTesting && targetSpeed > 0 ? targetSpeed + (Math.random() * 0.2 - 0.1) : targetSpeed;
     }
     
     if (currentDisplayedSpeed < 0) currentDisplayedSpeed = 0;
-
     document.getElementById('speed-result').innerHTML = `${currentDisplayedSpeed.toFixed(1)} <span style="font-size: 14px; color: #cbd5e1; font-weight: 600;">Mbps</span>`;
     animationFrameId = requestAnimationFrame(animateSpeed);
 }
@@ -33,7 +25,7 @@ function startPingLoop() {
             if (!isTesting) return;
             const pingTime = Math.round(performance.now() - pingStart);
             document.getElementById('ping-result').innerHTML = `Ping: ${pingTime} ms`;
-            pingTimeoutId = setTimeout(startPingLoop, 500); // Cek ping setiap 500ms
+            pingTimeoutId = setTimeout(startPingLoop, 500);
         })
         .catch(() => {
             if (!isTesting) return;
@@ -55,26 +47,19 @@ function startSpeedTest() {
     }
 
     document.getElementById('ping-result').innerHTML = 'Ping: Menguji...';
-
-    // Mulai loop ping real-time
     startPingLoop();
-    
-    // Mulai tes download langsung
     testDownloadSpeed();
 }
 
 async function testDownloadSpeed() {
     const btn = document.getElementById('start-speed-btn');
-    
-    // Perbesar ukuran payload (50MB)
     const downloadUrl = "https://speed.cloudflare.com/__down?bytes=50000000&nocache=" + Math.random();
     
     let loaded = 0;
     let testTimeout = null;
     let isAborted = false;
-    let streamStartTime = 0; // Waktu akan dimulai setelah koneksi tersambung
+    let streamStartTime = 0;
 
-    // Paksa tes selesai dalam 6 detik untuk mencegah tes berjalan terlalu lama
     testTimeout = setTimeout(() => {
         if (isTesting) {
             isAborted = true;
@@ -84,11 +69,9 @@ async function testDownloadSpeed() {
 
     try {
         const response = await fetch(downloadUrl);
-        // Koneksi berhasil tersambung (DNS, TCP, TLS selesai). Mulai perhitungan waktu MURNI unduhan.
         streamStartTime = performance.now(); 
         const reader = response.body.getReader();
 
-        // Loop streaming untuk membaca file per-bongkahan (chunk)
         while (true) {
             if (isAborted || !isTesting) {
                 reader.cancel();
@@ -96,21 +79,17 @@ async function testDownloadSpeed() {
             }
             
             const { done, value } = await reader.read();
-            
             if (done) {
                 if (!isAborted) finishSpeedTest(loaded);
                 break;
             }
 
             loaded += value.length;
-            
             const currentTime = performance.now();
             const durationInSeconds = (currentTime - streamStartTime) / 1000;
             
-            // Kalkulasi kumulatif untuk pergerakan angka yang terus naik/mulus
             if (durationInSeconds > 0.1) {
                 const bps = (loaded * 8) / durationInSeconds;
-                // 1 Megabit = 1.000.000 bit (Standar telekomunikasi/ISP)
                 targetSpeed = bps / 1000000; 
             }
         }
@@ -132,15 +111,10 @@ async function testDownloadSpeed() {
         }
 
         const currentTime = performance.now();
-        // Cegah division by zero jika gagal sebelum tersambung
         const durationInSeconds = streamStartTime > 0 ? (currentTime - streamStartTime) / 1000 : 0.1; 
-        const sizeInBits = finalBytes * 8;
-        
-        // Kecepatan akhir rata-rata (Menggunakan 1.000.000 bit)
-        const finalSpeed = sizeInBits / durationInSeconds / 1000000;
+        const finalSpeed = (finalBytes * 8) / durationInSeconds / 1000000;
         targetSpeed = finalSpeed;
         
-        // Beri waktu sejenak (500ms) untuk animasi mendarat ke angka akhir sebelum dimatikan
         setTimeout(() => {
             isTesting = false;
             clearTimeout(pingTimeoutId);

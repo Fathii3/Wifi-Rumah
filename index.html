@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -142,11 +143,9 @@
         <div class="absolute top-[40%] right-[15%] w-12 h-12 glass-panel rounded-xl -rotate-12 opacity-40"></div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- SCREEN INTRO (AWAL MASUK)                      -->
-    <!-- ============================================== -->
+    <!-- SCREEN INTRO -->
     <div id="screen-intro"
-        class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 py-12 min-h-screen hidden">
+        class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-12 pb-36 md:pb-40 min-h-screen">
         <div
             class="glass-panel-high rounded-[2.5rem] p-8 md:p-12 max-w-md w-full text-center animate-float flex flex-col items-center">
             <!-- Logo/Icon Section -->
@@ -195,11 +194,9 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- SCREEN BLOCKED (AKSES DITOLAK)                 -->
-    <!-- ============================================== -->
+    <!-- SCREEN BLOCKED -->
     <div id="screen-blocked"
-        class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 py-12 min-h-screen hidden">
+        class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-12 pb-36 md:pb-40 min-h-screen hidden">
         <div
             class="glass-panel-high rounded-[2.5rem] p-8 md:p-12 max-w-md w-full text-center flex flex-col items-center shadow-[0_0_40px_rgba(186,26,26,0.15)] border-error/20">
             <div
@@ -222,11 +219,9 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- SCREEN BERANDA (QR & PASSWORD)                 -->
-    <!-- ============================================== -->
+    <!-- SCREEN BERANDA -->
     <div id="screen-beranda"
-        class="relative hidden flex flex-col items-center justify-center min-h-screen w-full pt-12 pb-20 px-margin-mobile">
+        class="relative hidden flex flex-col items-center justify-center min-h-screen w-full pt-12 pb-36 md:pb-40 px-margin-mobile">
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center z-10">
             <div class="text-center mb-8 space-y-2">
                 <h2 class="font-display-lg text-headline-lg-mobile md:text-display-lg text-primary">Wi-Fi Connect</h2>
@@ -237,8 +232,8 @@
                 <!-- QR Code Option -->
                 <div
                     class="glass-panel-high rounded-3xl p-6 group flex flex-col items-center text-center btn-hover-effect">
-                    <div class="w-auto h-auto rounded-xl p-2 bg-white mb-4 shadow-sm border border-black/5">
-                        <div id="qrcode"></div>
+                    <div class="relative w-auto h-auto rounded-2xl p-3 bg-white mb-4 shadow-sm border border-black/5 flex items-center justify-center overflow-hidden min-h-[160px] min-w-[160px]">
+                        <div id="qrcode" class="flex items-center justify-center"></div>
                     </div>
                     <h3 class="font-headline-lg-mobile md:text-xl text-on-background font-bold mb-2">QR Code</h3>
                     <p class="text-on-surface-variant mb-6 font-body-md text-xs">Pindai kode QR untuk terhubung secara
@@ -406,13 +401,13 @@
     </div>
 
     <script src="config.js"></script>
-    <script src="app.js"></script>
     <script>
         // ==========================================
-        // INITIALIZATION (QR & Sandi)
+        // INITIALIZATION & ELEGANT ME-QR RENDERING
         // ==========================================
         let isWifiConfigLoaded = false;
         let isPasswordVisible = false;
+        let qrCodeStylingInstance = null;
 
         async function initWifiConfig() {
             if (isWifiConfigLoaded) return;
@@ -420,7 +415,6 @@
 
             let ssid, password, encryption;
 
-            // Ambil dari Vercel Serverless API jika diakses online di web HTTPS
             if (window.location.protocol !== 'file:') {
                 try {
                     const res = await fetch('/api/wifi-config');
@@ -435,7 +429,6 @@
                 }
             }
 
-            // Fallback ke config.js lokal jika offline atau file dibuka langsung
             if (!ssid && typeof wifiConfig !== 'undefined') {
                 ssid = wifiConfig.ssid;
                 password = wifiConfig.password;
@@ -444,23 +437,52 @@
 
             if (ssid) {
                 document.getElementById('wifi-name-display').innerText = ssid;
-
-                // Generate QR
-                const wifiString = `WIFI:S:${ssid};T:${encryption};P:${password};;`;
-                const qrcodeEl = document.getElementById("qrcode");
-                if (qrcodeEl) {
-                    qrcodeEl.innerHTML = "";
-                    new QRCode(qrcodeEl, {
-                        text: wifiString,
-                        width: 140,
-                        height: 140,
-                        colorDark: "#0b1c30",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                }
-
+                window.wifiSSID = ssid;
                 window.wifiPassword = password;
+
+                const wifiString = `WIFI:S:${ssid};T:${encryption};P:${password};;`;
+                renderStyledQR(wifiString);
+            }
+        }
+
+        function renderStyledQR(wifiString) {
+            const container = document.getElementById('qrcode');
+            if (!container) return;
+            container.innerHTML = "";
+
+            if (typeof QRCodeStyling !== 'undefined') {
+                qrCodeStylingInstance = new QRCodeStyling({
+                    width: 150,
+                    height: 150,
+                    type: "canvas",
+                    data: wifiString,
+                    qrOptions: { errorCorrectionLevel: 'H' },
+                    dotsOptions: {
+                        type: "extra-rounded",
+                        color: "#0b1c30"
+                    },
+                    cornersSquareOptions: {
+                        type: "extra-rounded",
+                        color: "#0b1c30"
+                    },
+                    cornersDotOptions: {
+                        type: "dot",
+                        color: "#0b1c30"
+                    },
+                    backgroundOptions: {
+                        color: "#ffffff"
+                    }
+                });
+                qrCodeStylingInstance.append(container);
+            } else if (typeof QRCode !== 'undefined') {
+                new QRCode(container, {
+                    text: wifiString,
+                    width: 150,
+                    height: 150,
+                    colorDark: "#0b1c30",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
             }
         }
 
@@ -536,24 +558,31 @@
         }
 
         function downloadQR() {
-            const qrCanvas = document.querySelector('#qrcode canvas');
-            if (qrCanvas) {
-                const padding = 20;
-                const newCanvas = document.createElement('canvas');
-                newCanvas.width = qrCanvas.width + (padding * 2);
-                newCanvas.height = qrCanvas.height + (padding * 2);
-
-                const ctx = newCanvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-                ctx.drawImage(qrCanvas, padding, padding);
-
-                const link = document.createElement('a');
-                link.download = 'Wi-Fi_QR_Code.png';
-                link.href = newCanvas.toDataURL("image/png");
-                link.click();
+            if (qrCodeStylingInstance) {
+                qrCodeStylingInstance.download({
+                    name: `Wi-Fi_QR_${(window.wifiSSID || 'Rumah').replace(/[^a-zA-Z0-9]/g, '_')}`,
+                    extension: "png"
+                });
             } else {
-                showAlert("Error", "Gagal mengunduh QR Code. Silakan screenshot layar ini.");
+                const qrCanvas = document.querySelector('#qrcode canvas');
+                if (qrCanvas) {
+                    const padding = 20;
+                    const newCanvas = document.createElement('canvas');
+                    newCanvas.width = qrCanvas.width + (padding * 2);
+                    newCanvas.height = qrCanvas.height + (padding * 2);
+
+                    const ctx = newCanvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+                    ctx.drawImage(qrCanvas, padding, padding);
+
+                    const link = document.createElement('a');
+                    link.download = `Wi-Fi_QR_${(window.wifiSSID || 'Rumah').replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                    link.href = newCanvas.toDataURL("image/png");
+                    link.click();
+                } else {
+                    showAlert("Error", "Gagal mengunduh QR Code. Silakan screenshot layar ini.");
+                }
             }
         }
 
@@ -575,6 +604,7 @@
             }, 2500);
         }
     </script>
+    <script src="app.js"></script>
 </body>
 
 </html>

@@ -65,7 +65,7 @@
         <div class="absolute top-[30%] right-[20%] w-[40%] h-[40%] bg-primary/10 rounded-full bg-glow"></div>
     </div>
 
-    <div class="relative flex-col items-center justify-center min-h-screen w-full pt-12 pb-20 px-4 flex">
+    <div class="relative flex-col items-center justify-center min-h-screen w-full pt-12 pb-36 md:pb-40 px-4 flex">
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center py-4 z-10 mt-6">
             <div class="text-center mb-8 space-y-2">
                 <h2 class="font-display-lg text-2xl md:text-3xl text-primary font-bold">Pemantauan Jaringan</h2>
@@ -263,12 +263,23 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        function initPerangkat() {
             fetchDevices();
             // Update data dari server lokal dan animasi UI setiap 2 detik
             setInterval(fetchDevices, 2000);
+        }
 
-            // Setup Modal Pengaturan API
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initPerangkat();
+                setupSettingsModal();
+            });
+        } else {
+            initPerangkat();
+            setupSettingsModal();
+        }
+
+        function setupSettingsModal() {
             const modal = document.getElementById('settings-modal');
             const btnSettings = document.getElementById('btn-settings');
             const btnClose = document.getElementById('btn-close-settings');
@@ -377,7 +388,7 @@
                     fetchDevices();
                 });
             }
-        });
+        }
     </script>
 
     <!-- Modal Pengaturan API -->

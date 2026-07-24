@@ -1,34 +1,30 @@
-// Backend Server untuk Scraper Router HSGQ (192.168.1.1)
-// Anda perlu menginstal NodeJS, lalu jalankan di terminal:
-// npm init -y
-// npm install express cors puppeteer
-
 const express = require('express');
 const cors = require('cors');
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
 
 const app = express();
-app.use(cors()); // Mengizinkan web statis mengambil data dari server ini
-app.use(express.static(__dirname)); // Melayani berkas statis (index.html, perangkat.html, dll.) secara otomatis
+app.use(cors());
+app.use(express.static(__dirname));
 
 let cachedDevices = [];
 
-// Fungsi Robot Scraper (Puppeteer) - Berjalan terus menerus
+// Robot Scraper (Puppeteer)
 async function scrapeRouter() {
-    console.log("Memulai pemantauan Router 192.168.1.1 (Real-Time setiap 5 detik)...");
+    console.log("Memulai pemantauan Router 192.168.1.1...");
     
     while (true) {
         let browser;
         try {
-            // Otomatis headless jika berjalan di Android (Termux) agar tidak error GUI
             const isHeadless = process.platform === 'android' || process.env.HEADLESS === 'true';
-            const fs = require('fs');
             const winChromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
             
             const launchOptions = {
                 headless: isHeadless, 
                 defaultViewport: null,
-                args: ['--no-sandbox', '--disable-setuid-sandbox'] // Diperlukan untuk lingkungan Termux/Linux
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
             };
 
             if (process.platform === 'win32' && fs.existsSync(winChromePath)) {
@@ -53,15 +49,12 @@ async function scrapeRouter() {
             browser = await puppeteer.launch(launchOptions);
             const page = await browser.newPage();
             
-            // Meneruskan log dari dalam browser ke terminal Node.js Anda
             page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
 
-            // 1. Buka halaman router
             await page.goto('http://192.168.1.1/admin/login.asp', { waitUntil: 'networkidle2' }).catch(() => {
                 return page.goto('http://192.168.1.1', { waitUntil: 'networkidle2' });
             });
 
-            // Cari Frame untuk Form Login
             let targetFrame = null;
             for (const frame of page.frames()) {
                 try {
@@ -76,7 +69,6 @@ async function scrapeRouter() {
                 targetFrame = page;
             }
 
-            // Isi form dan login
             await targetFrame.evaluate((user, pass) => {
                 const userField = document.querySelector('#username1');
                 const passField = document.querySelector('#psd1');
@@ -88,7 +80,6 @@ async function scrapeRouter() {
 
             await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
 
-            // Cek apakah sudah login sebelumnya
             let isAlreadyLoggedIn = false;
             for (const frame of page.frames()) {
                 const foundError = await frame.evaluate(() => {
@@ -109,14 +100,12 @@ async function scrapeRouter() {
             }
 
             if (isAlreadyLoggedIn) {
-                console.log("Sistem mendeteksi Anda sudah login sebelumnya, mengeklik tombol OK...");
+                console.log("Sudah login sebelumnya, menekan OK...");
                 await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
             }
 
-            // Tunggu menu selesai dimuat
             await new Promise(resolve => setTimeout(resolve, 4000));
 
-            // Fungsi pembantu mengeklik menu
             async function clickMenu(menuName, preferredFrameName = null) {
                 let clickedElements = 0;
                 if (preferredFrameName) {
@@ -155,7 +144,6 @@ async function scrapeRouter() {
                 return clickedElements > 0;
             }
 
-            // Fungsi pembantu mengekstrak tabel
             async function extractTables() {
                 let extractedDevices = [];
                 for (const frame of page.frames()) {
@@ -196,12 +184,9 @@ async function scrapeRouter() {
                                         }
                                     }
 
-                                    // FILTER: Abaikan BSSID router dan baris BSSID tersendiri
                                     const isRouterMac = macAddress.replace(/:/g, '') === '98c7a46b875d';
                                     const isBssidRow = deviceName.toUpperCase() === 'BSSID' || macAddress === '98:c7:a4:6b:87:5d';
-                                    if (isRouterMac || isBssidRow) {
-                                        return;
-                                    }
+                                    if (isRouterMac || isBssidRow) return;
 
                                     if (!deviceMap[macAddress]) {
                                         deviceMap[macAddress] = { 
@@ -233,35 +218,29 @@ async function scrapeRouter() {
                             extractedDevices = extractedDevices.concat(devicesInFrame);
                         }
                     } catch(e) {
-                        console.error("EXTRACT ERROR in frame:", frame.name(), e.message);
+                        console.error("EXTRACT ERROR:", frame.name(), e.message);
                     }
                 }
                 return extractedDevices;
             }
 
-            // Klik menu utama 'LAN & WLAN' sekali di awal
-            console.log("Mengeklik menu utama 'LAN & WLAN'...");
+            console.log("Mengeklik menu 'LAN & WLAN'...");
             await clickMenu('LAN & WLAN', 'topFrame');
             await new Promise(r => setTimeout(r, 4000));
 
-            // Loop utama penyegaran data setiap 5 detik di browser yang sama
             while (true) {
-                console.log("\n--- Memindai data perangkat (Real-Time setiap 5 detik) ---");
                 let allDevices = [];
 
-                // Klik sub-menu 'Device Info'
                 await clickMenu('Device Info', 'leftFrame');
                 await new Promise(r => setTimeout(r, 1000));
                 const infoData = await extractTables();
                 allDevices = allDevices.concat(infoData);
 
-                // Klik sub-menu 'Bandwidth Info'
                 await clickMenu('Bandwidth Info', 'leftFrame');
                 await new Promise(r => setTimeout(r, 1000));
                 const bwData = await extractTables();
                 allDevices = allDevices.concat(bwData);
 
-                // Gabungkan data
                 if (allDevices.length > 0) {
                     const merged = {};
                     allDevices.forEach(dev => {
@@ -276,73 +255,47 @@ async function scrapeRouter() {
                     });
                     
                     cachedDevices = Object.values(merged);
-                    console.log(`Pembaruan sukses! Terdeteksi ${cachedDevices.length} perangkat aktif.`);
-                } else {
-                    console.log("Peringatan: Tidak ada perangkat terdeteksi pada pemindaian ini.");
+                    console.log(`Pemindaian sukses: ${cachedDevices.length} perangkat aktif.`);
                 }
 
-                // Jeda 5 detik
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
 
         } catch (error) {
-            console.error("Koneksi terputus atau browser ditutup. Error:", error.message);
-            if (browser) {
-                await browser.close().catch(() => {});
-            }
-            console.log("Mencoba menyambungkan kembali dalam 5 detik...");
+            console.error("Error scraper:", error.message);
+            if (browser) await browser.close().catch(() => {});
             await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
 }
 
-// Jalankan sistem scraper real-time
 scrapeRouter();
 
-// ----------------------------------------------------
-// API Endpoint yang akan dipanggil oleh perangkat.html
-// ----------------------------------------------------
 app.get('/api/devices', (req, res) => {
     if (cachedDevices.length === 0) {
-        // Fallback dihapus. Langsung kirim error jika tidak ada data dari router
-        res.status(500).json({ error: "Router sedang loading atau tidak dapat mengambil data perangkat." });
+        res.status(500).json({ error: "Router sedang memuat data perangkat." });
     } else {
         res.json(cachedDevices);
     }
 });
 
-// Fungsi untuk menjalankan secure tunnel Ngrok secara otomatis jika file token ditemukan
+// Jalankan Ngrok otomatis jika ada token
 async function startNgrok() {
-    const { spawn } = require('child_process');
-    const fs = require('fs');
-    const path = require('path');
-
     const tokenPath = path.join(__dirname, 'ngrok_token.txt');
-    if (!fs.existsSync(tokenPath)) {
-        console.warn("⚠️ Berkas 'ngrok_token.txt' tidak ditemukan di folder server. Terowongan Ngrok otomatis dinonaktifkan.");
-        return;
-    }
+    if (!fs.existsSync(tokenPath)) return;
     
     const token = fs.readFileSync(tokenPath, 'utf8').trim();
-    if (!token) {
-        console.warn("⚠️ Berkas 'ngrok_token.txt' kosong. Terowongan Ngrok otomatis dinonaktifkan.");
-        return;
-    }
+    if (!token) return;
 
-    console.log("Mendeteksi ngrok_token.txt. Memulai secure tunnel Ngrok secara otomatis...");
+    console.log("Memulai secure tunnel Ngrok...");
 
-    // Cek apakah ada file static domain
     const domainPath = path.join(__dirname, 'ngrok_domain.txt');
     let domainArgs = [];
     if (fs.existsSync(domainPath)) {
         const domain = fs.readFileSync(domainPath, 'utf8').trim();
-        if (domain) {
-            domainArgs = ['--domain', domain];
-            console.log(`Menggunakan static domain Ngrok: ${domain}`);
-        }
+        if (domain) domainArgs = ['--domain', domain];
     }
 
-    // Jalankan ngrok menggunakan npx di PC/Windows, atau binary ngrok langsung di Android (Termux)
     let command = 'npx';
     let args = ['ngrok', 'http', '3000', '--authtoken', token, ...domainArgs];
     
@@ -351,29 +304,17 @@ async function startNgrok() {
         args = ['http', '3000', '--authtoken', token, ...domainArgs];
     }
 
-    const ngrokProcess = spawn(command, args, {
-        shell: true
-    });
+    const ngrokProcess = spawn(command, args, { shell: true });
 
     ngrokProcess.on('error', (err) => {
-        console.error("⚠️ Gagal menjalankan Ngrok secara otomatis. Detail:", err.message);
+        console.error("Gagal menjalankan Ngrok:", err.message);
     });
 
-    // Pastikan proses dimatikan ketika aplikasi Node utama ditutup
     process.on('exit', () => ngrokProcess.kill());
-    process.on('SIGINT', () => {
-        ngrokProcess.kill();
-        process.exit();
-    });
-    process.on('SIGTERM', () => {
-        ngrokProcess.kill();
-        process.exit();
-    });
+    process.on('SIGINT', () => { ngrokProcess.kill(); process.exit(); });
+    process.on('SIGTERM', () => { ngrokProcess.kill(); process.exit(); });
 
-    // Polling untuk mengambil URL publik dari REST API lokal Ngrok (menunggu sampai aktif)
     let checkCount = 0;
-    const maxChecks = 6; // Cek setiap 2 detik, total 12 detik
-    
     const checkInterval = setInterval(async () => {
         checkCount++;
         try {
@@ -385,25 +326,17 @@ async function startNgrok() {
                 
                 if (httpsTunnel) {
                     clearInterval(checkInterval);
-                    console.log("\n========================================================");
-                    console.log(`🚀 NGROK TUNNEL BERHASIL AKTIF SECARA OTOMATIS!`);
-                    console.log(`Tautan HTTPS Anda: ${httpsTunnel.public_url}`);
-                    console.log("========================================================\n");
+                    console.log(`Ngrok Tunnel Aktif: ${httpsTunnel.public_url}`);
                 }
             }
-        } catch (e) {
-            // Abaikan error koneksi saat ngrok sedang memulai
-        }
+        } catch (e) {}
 
-        if (checkCount >= maxChecks) {
-            clearInterval(checkInterval);
-        }
+        if (checkCount >= 6) clearInterval(checkInterval);
     }, 2000);
 }
 
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Backend Server berjalan di http://localhost:${PORT}`);
-    console.log(`Web Statis Anda sekarang bisa memanggil API ini untuk mendapatkan data Real-Time dari Router!`);
     startNgrok();
 });

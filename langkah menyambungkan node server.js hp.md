@@ -99,10 +99,10 @@ cd Wifi-Rumah
 
 Jalankan perintah ini satu per satu di dalam folder `Wifi-Rumah` untuk memasukkan token dan domain statis rahasia Anda secara lokal:
 
-. Membuat File Token Ngrok:
- ```bash
- echo "FwxyRVOnUIWoDjNJwnjFtBe_jgYfTFHwQBzouuBXM" > ngrok_token.txt
- ```
+1. Membuat File Token Ngrok:
+   ```bash
+   echo "<TOKEN_NGROK_ANDA>" > ngrok_token.txt
+   ```
 
 . Membuat File Domain Statis Ngrok:
  ```bash

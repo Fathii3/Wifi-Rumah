@@ -13,8 +13,9 @@ module.exports = async (req, res) => {
         return;
     }
 
-    let ssid = "Wifi-Rumah";
-    let password = "Rumah321@";
+    // Nilai default (contoh). Konfigurasi Wi-Fi asli tersimpan aman di Vercel Environment Variables / Edge Config
+    let ssid = "Nama_Wifi_Contoh";
+    let password = "PasswordContoh123";
     let encryption = "WPA";
 
     if (process.env.EDGE_CONFIG) {

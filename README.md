@@ -18,12 +18,12 @@ http://.../admin/login.asp
 
 Username:
 ```text
-admin
+nimda
 ```
 
 Password:
 ```text
-Rumah
+hamuR
 ```
 
 > [!IMPORTANT]

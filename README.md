@@ -26,9 +26,5 @@ Password:
 hamuR
 ```
 
-> [!IMPORTANT]
-> Keamanan Kredensial
-> Karena repositori GitHub ini telah dikunci (berstatus Private), data login di atas dijamin aman dan hanya bisa dibaca oleh Anda.
-
 ---
 By: Family Pak Harun

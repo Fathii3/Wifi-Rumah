@@ -4,7 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Wi-Fi Connect - Beranda</title>
+    <title>Wi-Fi Connect</title>
+    <link rel="icon" type="image/webp" href="logo/logo.webp" />
+    <link rel="apple-touch-icon" href="logo/logo.webp" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" />
@@ -110,24 +112,25 @@
 
 <body class="bg-background text-on-surface font-body-lg min-h-screen overflow-x-hidden selection:bg-primary/20">
 
-<!-- SVG Liquid Glass Filter Definition -->
-<svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
-  <defs>
-    <filter id="liquid-glass" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="1.2" result="blur" />
-      <feSpecularLighting in="blur" surfaceScale="3.5" specularConstant="1.2" specularExponent="25" lighting-color="#ffffff" result="specular">
-        <feDistantLight azimuth="225" elevation="65" />
-      </feSpecularLighting>
-      <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss" />
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25" result="shadow" />
-      <feMerge>
-        <feMergeNode in="shadow" />
-        <feMergeNode in="SourceGraphic" />
-        <feMergeNode in="gloss" />
-      </feMerge>
-    </filter>
-  </defs>
-</svg>
+    <!-- SVG Liquid Glass Filter Definition -->
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
+        <defs>
+            <filter id="liquid-glass" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="1.2" result="blur" />
+                <feSpecularLighting in="blur" surfaceScale="3.5" specularConstant="1.2" specularExponent="25"
+                    lighting-color="#ffffff" result="specular">
+                    <feDistantLight azimuth="225" elevation="65" />
+                </feSpecularLighting>
+                <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss" />
+                <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25" result="shadow" />
+                <feMerge>
+                    <feMergeNode in="shadow" />
+                    <feMergeNode in="SourceGraphic" />
+                    <feMergeNode in="gloss" />
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
 
 
     <!-- Atmospheric Background Elements -->
@@ -150,8 +153,8 @@
             class="glass-panel-high rounded-[2.5rem] p-8 md:p-12 max-w-md w-full text-center animate-float flex flex-col items-center">
             <!-- Logo/Icon Section -->
             <div
-                class="w-20 h-20 rounded-3xl bg-primary-container flex items-center justify-center mb-8 shadow-lg shadow-primary/20">
-                <span class="material-symbols-outlined text-white text-4xl">&#xe63e;</span>
+                class="w-20 h-20 rounded-3xl overflow-hidden mb-8 shadow-lg shadow-primary/20 flex items-center justify-center">
+                <img src="logo/logo.webp" alt="Logo Wi-Fi" class="w-full h-full object-cover" />
             </div>
             <!-- Headers -->
             <h1 class="font-headline-md text-3xl text-on-surface mb-2">Selamat Datang!</h1>
@@ -232,7 +235,8 @@
                 <!-- QR Code Option -->
                 <div
                     class="glass-panel-high rounded-3xl p-6 group flex flex-col items-center text-center btn-hover-effect">
-                    <div class="relative w-auto h-auto rounded-2xl p-3 bg-white mb-4 shadow-sm border border-black/5 flex items-center justify-center overflow-hidden min-h-[160px] min-w-[160px]">
+                    <div
+                        class="relative w-auto h-auto rounded-2xl p-3 bg-white mb-4 shadow-sm border border-black/5 flex items-center justify-center overflow-hidden min-h-[160px] min-w-[160px]">
                         <div id="qrcode" class="flex items-center justify-center"></div>
                     </div>
                     <h3 class="font-headline-lg-mobile md:text-xl text-on-background font-bold mb-2">QR Code</h3>
@@ -424,7 +428,7 @@
                         password = data.password;
                         encryption = data.encryption;
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error("Gagal memuat konfigurasi Wi-Fi dari API Vercel:", e);
                 }
             }

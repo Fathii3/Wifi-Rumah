@@ -9,6 +9,27 @@ const app = express();
 app.use(cors());
 app.use(express.static(__dirname));
 
+// Memuat variabel lingkungan dari file .env jika ada
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+    if (typeof process.loadEnvFile === 'function') {
+        process.loadEnvFile(envPath);
+    } else {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        envContent.split(/\r?\n/).forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#')) {
+                const eqIdx = trimmed.indexOf('=');
+                if (eqIdx !== -1) {
+                    const key = trimmed.substring(0, eqIdx).trim();
+                    const val = trimmed.substring(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+                    process.env[key] = val;
+                }
+            }
+        });
+    }
+}
+
 let cachedDevices = [];
 
 // Robot Scraper (Puppeteer)
@@ -69,6 +90,9 @@ async function scrapeRouter() {
                 targetFrame = page;
             }
 
+            const routerUser = process.env.ROUTER_USER || 'admin';
+            const routerPass = process.env.ROUTER_PASS || 'Rumah';
+
             await targetFrame.evaluate((user, pass) => {
                 const userField = document.querySelector('#username1');
                 const passField = document.querySelector('#psd1');
@@ -76,7 +100,7 @@ async function scrapeRouter() {
                 if (passField) passField.value = pass;
                 const btn = document.querySelector('input[value="Login"], input[type="submit"], input[type="button"], button');
                 if (btn) btn.click();
-            }, 'admin', 'Rumah');
+            }, routerUser, routerPass);
 
             await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => {});
 

@@ -1,15 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
 
+/* ==========================================================================
+   Cross-Browser Typography & Font Consistency Design System
+   ========================================================================== */
+:root {
+    --font-primary: 'Montserrat', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    font-family: var(--font-primary);
+}
+
+html, body {
+    font-family: var(--font-primary) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+}
+
+button, input, select, textarea {
+    font-family: var(--font-primary) !important;
+}
+
+/* ==========================================================================
+   Material Symbols Icons (Ensures identical icon & font rendering in Chrome/Safari/Firefox)
+   ========================================================================== */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Rounded' !important;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    filter: url(#liquid-glass);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.icon-fill-0 {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+}
+
+.icon-fill-1 {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+}
+
+/* ==========================================================================
+   Glassmorphism & Background Effects
+   ========================================================================== */
 .glass-panel {
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .glass-panel-high {
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     border: 1px solid rgba(255, 255, 255, 0.8);
     box-shadow: 0 10px 40px -10px rgba(70, 72, 212, 0.15);
 }
@@ -17,6 +79,7 @@
 .glass-card {
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
 }
@@ -37,6 +100,20 @@
     z-index: 0;
 }
 
+.z-base {
+    z-index: 0;
+}
+
+.svg-hidden-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   Animations & Hover Utilities
+   ========================================================================== */
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
@@ -46,13 +123,8 @@
     animation: float 6s ease-in-out infinite;
 }
 
-.material-symbols-outlined {
-    font-family: 'Material Symbols Rounded';
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    display: inline-block;
-    vertical-align: middle;
-    filter: url(#liquid-glass);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+.animate-duration-8s {
+    animation-duration: 8s !important;
 }
 
 .nav-btn:hover .material-symbols-outlined,
@@ -69,6 +141,13 @@ button:hover .material-symbols-outlined {
     transform: scale(0.96);
 }
 
+/* ==========================================================================
+   Speedometer Gauge & Labels
+   ========================================================================== */
+.gauge-rotate {
+    transform: rotate(135deg);
+}
+
 .gauge-svg {
     transform: rotate(-90deg);
 }
@@ -80,4 +159,34 @@ button:hover .material-symbols-outlined {
 .speed-needle {
     transform-origin: 80px 80px;
     transition: transform 0.2s ease-out;
+}
+
+.speed-label-0 {
+    left: 23.5%;
+    top: 76.5%;
+    transform: translate(-50%, -50%);
+}
+
+.speed-label-10 {
+    left: 15.3%;
+    top: 35.6%;
+    transform: translate(-50%, -50%);
+}
+
+.speed-label-100 {
+    left: 50%;
+    top: 12.5%;
+    transform: translate(-50%, -50%);
+}
+
+.speed-label-500 {
+    left: 84.7%;
+    top: 35.6%;
+    transform: translate(-50%, -50%);
+}
+
+.speed-label-1000 {
+    left: 76.5%;
+    top: 76.5%;
+    transform: translate(-50%, -50%);
 }

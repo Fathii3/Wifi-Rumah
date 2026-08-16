@@ -1,7 +1,8 @@
 // Deteksi Provider ISP
 function formatISPName(rawName) {
     if (!rawName) return "Jaringan Lokal";
-    const name = rawName.toLowerCase();
+    let cleaned = rawName.replace(/^IDNIC-[^\s]+ - /i, '').replace(/^AS\d+ /i, '').trim();
+    const name = cleaned.toLowerCase();
 
     if (name.includes("telekomunikasi selular") || name.includes("telkomsel")) return "Telkomsel";
     if (name.includes("telekomunikasi indonesia") || name.includes("telkom indonesia")) return "IndiHome (Telkom)";
@@ -16,7 +17,7 @@ function formatISPName(rawName) {
     if (name.includes("smartfren")) return "Smartfren";
     if (name.includes("indonesia comnets plus") || name.includes("icon")) return "ICONNET";
 
-    return rawName;
+    return cleaned || rawName;
 }
 
 async function detectISP() {
@@ -42,58 +43,6 @@ async function detectISP() {
     } catch (error) {
         ispElements.forEach(el => { removeSkeleton(el); el.innerText = "Tidak Terdeteksi"; });
         cityElements.forEach(el => { removeSkeleton(el); el.innerText = "-"; });
-    }
-}
-
-// Deteksi IP lokal jaringan (WebRTC -> fallback IP publik)
-async function detectLocalIP() {
-    const localIpElements = document.querySelectorAll('.local-ip-display');
-    if (localIpElements.length === 0) return;
-
-    const removeSkeleton = (el) => {
-        el.classList.remove('animate-pulse', 'bg-neu-dark/20', 'h-3.5', 'w-24', 'inline-block', 'rounded', 'mt-1');
-    };
-
-    let found = false;
-
-    // Cara 1: WebRTC (works di jaringan lokal, bisa diblokir di HTTPS)
-    try {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel('');
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-
-        await new Promise((resolve) => {
-            const timeout = setTimeout(() => resolve(), 3000);
-            pc.onicecandidate = (e) => {
-                if (!e.candidate) { clearTimeout(timeout); resolve(); return; }
-                const parts = e.candidate.candidate.split(' ');
-                const ip = parts[4];
-                if (ip && /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(ip)) {
-                    localIpElements.forEach(el => { removeSkeleton(el); el.innerText = ip; });
-                    found = true;
-                    clearTimeout(timeout);
-                    resolve();
-                }
-            };
-        });
-        pc.close();
-    } catch (e) {}
-
-    // Cara 2: Fallback ke IP publik dari ipwho.is (sudah di-cache oleh detectISP)
-    if (!found) {
-        try {
-            const res = await fetch('https://ipwho.is/');
-            const data = await res.json();
-            if (data.success && data.ip) {
-                localIpElements.forEach(el => { removeSkeleton(el); el.innerText = data.ip; });
-                found = true;
-            }
-        } catch (e) {}
-    }
-
-    if (!found) {
-        localIpElements.forEach(el => { removeSkeleton(el); el.innerText = 'Tidak tersedia'; });
     }
 }
 
@@ -270,7 +219,6 @@ function initApp() {
     checkAccessStatus();
     updateActiveNav();
     detectISP();
-    detectLocalIP();
 }
 
 if (document.readyState === 'loading') {

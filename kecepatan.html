@@ -131,9 +131,7 @@
                         <span
                             class="font-bold text-base text-text-primary isp-name-display inline-block h-5 w-28 bg-neu-dark/20 animate-pulse rounded mt-1"></span>
                         <span
-                            class="text-xs text-text-muted font-mono local-ip-display inline-block h-3.5 w-24 bg-neu-dark/20 animate-pulse rounded mt-1"></span>
-                        <span
-                            class="text-xs text-text-subtle isp-city-display inline-block h-3.5 w-20 bg-neu-dark/20 animate-pulse rounded mt-1"></span>
+                            class="text-sm text-text-muted isp-city-display inline-block h-4 w-20 bg-neu-dark/20 animate-pulse rounded mt-1"></span>
                     </div>
                 </div>
             </div>
@@ -226,7 +224,7 @@
 
         <!-- History Panel (below main card) -->
         <div id="history-panel" class="w-full max-w-md mx-auto mt-6 hidden">
-            <div class="neu-card-lg overflow-hidden">
+            <div class="neu-card-lg rounded-3xl overflow-hidden">
                 <div class="px-5 py-4 flex justify-between items-center border-b border-neu-dark/15">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">&#xe889;</span>
@@ -241,9 +239,29 @@
                         </button>
                     </div>
                 </div>
-                <div id="history-list" class="flex flex-col gap-2 p-3 max-h-[400px] overflow-y-auto">
+                <div id="history-list" class="flex flex-col gap-2.5 p-3.5 max-h-[380px] overflow-y-auto custom-scroll">
                     <div class="p-6 text-center text-sm text-text-muted">Belum ada riwayat tes.</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus Riwayat (Neumorphic) -->
+    <div id="clear-confirm-modal" class="fixed inset-0 z-[100] flex items-center justify-center px-4 neu-modal-overlay hidden">
+        <div class="neu-modal p-6 md:p-8 max-w-sm w-full text-center flex flex-col items-center">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center text-error neu-circle mb-4">
+                <span class="material-symbols-outlined text-[28px]">&#xe872;</span>
+            </div>
+            <h3 class="font-bold text-lg text-text-primary mb-2">Hapus Semua Riwayat?</h3>
+            <p class="text-sm text-text-muted mb-6 leading-relaxed">Seluruh data riwayat tes kecepatan yang tersimpan akan dihapus permanen.</p>
+            <div class="flex gap-3 w-full">
+                <button onclick="closeClearModal()" class="flex-1 neu-btn-ghost font-semibold py-3 px-4 rounded-xl text-sm transition-all">
+                    Batal
+                </button>
+                <button onclick="confirmClearAllHistory()" class="flex-1 neu-btn-danger font-bold py-3 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">&#xe872;</span>
+                    Hapus
+                </button>
             </div>
         </div>
     </div>
@@ -410,10 +428,19 @@
                     await new Promise(r => setTimeout(r, 40));
                 }
 
+                let accuratePing = 20;
+                let calculatedJitter = 1;
                 if (pingSamples.length > 0) {
+                    if (pingSamples.length > 1) {
+                        let diffSum = 0;
+                        for (let i = 1; i < pingSamples.length; i++) {
+                            diffSum += Math.abs(pingSamples[i] - pingSamples[i - 1]);
+                        }
+                        calculatedJitter = Math.round(diffSum / (pingSamples.length - 1));
+                    }
                     pingSamples.sort((a, b) => a - b);
                     const validSamples = pingSamples.slice(0, Math.max(1, Math.floor(pingSamples.length * 0.75)));
-                    const accuratePing = Math.round(validSamples.reduce((a, b) => a + b, 0) / validSamples.length);
+                    accuratePing = Math.round(validSamples.reduce((a, b) => a + b, 0) / validSamples.length);
                     pingDisplay.innerText = accuratePing;
                 } else {
                     pingDisplay.innerText = '20';
@@ -522,7 +549,7 @@
                         btn.innerHTML = '<span class="material-symbols-outlined">&#xe5d5;</span> Ulangi Tes';
 
                         // Save result to local history
-                        const finalPing = parseInt(pingDisplay.innerText) || 0;
+                        const finalPing = parseInt(pingDisplay.innerText) || accuratePing;
                         saveSpeedResult(finalPing, currentDisplayMbps);
                     }, 500);
                 }, 300);
@@ -558,7 +585,6 @@
         function saveSpeedResult(ping, mbps) {
             const ispEl = document.querySelector('.isp-name-display');
             const cityEl = document.querySelector('.isp-city-display');
-            const localIpEl = document.querySelector('.local-ip-display');
 
             const entry = {
                 id: Date.now(),
@@ -566,8 +592,7 @@
                 ping: ping,
                 speed: parseFloat(mbps.toFixed(2)),
                 isp: ispEl ? ispEl.innerText : '-',
-                city: cityEl ? cityEl.innerText : '-',
-                ip: localIpEl ? localIpEl.innerText : '-'
+                city: cityEl ? cityEl.innerText : '-'
             };
 
             const history = getHistory();
@@ -632,10 +657,20 @@
         }
 
         function clearAllHistory() {
-            if (!confirm('Hapus semua riwayat tes kecepatan?')) return;
+            const modal = document.getElementById('clear-confirm-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeClearModal() {
+            const modal = document.getElementById('clear-confirm-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function confirmClearAllHistory() {
             localStorage.removeItem(HISTORY_KEY);
             renderHistory();
             updateHistoryBadge();
+            closeClearModal();
         }
 
         function renderHistory() {
@@ -661,31 +696,25 @@
                 row.innerHTML = `
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-2">
+                            <div class="flex items-center gap-2 mb-2.5">
                                 <span class="text-lg font-bold text-text-primary">${entry.speed} <span class="text-xs font-semibold text-text-muted">Mbps</span></span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${label.color}" style="background: currentColor; -webkit-background-clip: text; background-clip: text;">
-                                </span>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${label.color}" style="background: rgba(0,0,0,0.04);">${label.text}</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
                                 <div class="flex items-center gap-1.5">
                                     <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe55f;</span>
                                     <span class="text-text-muted">Ping:</span>
                                     <span class="font-bold ${pingColor}">${entry.ping} ms</span>
                                 </div>
                                 <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe894;</span>
-                                    <span class="text-text-muted">ISP:</span>
-                                    <span class="font-semibold text-text-primary truncate max-w-[90px]">${entry.isp}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe63e;</span>
-                                    <span class="text-text-muted">Lokal:</span>
-                                    <span class="font-mono text-text-primary text-[11px]">${entry.ip}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
                                     <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe55e;</span>
-                                    <span class="text-text-muted">${entry.city}</span>
+                                    <span class="text-text-muted">Lokasi:</span>
+                                    <span class="font-medium text-text-primary truncate">${entry.city}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 col-span-2 pt-0.5">
+                                    <span class="material-symbols-outlined text-[14px] text-text-subtle shrink-0">&#xe894;</span>
+                                    <span class="text-text-muted shrink-0">ISP:</span>
+                                    <span class="font-semibold text-text-primary break-words leading-tight">${entry.isp}</span>
                                 </div>
                             </div>
                             <div class="mt-2 text-[10px] text-text-subtle">${formatDate(entry.date)}</div>
@@ -706,6 +735,17 @@
         if (hasTestedOnce) {
             document.getElementById('start-speed-btn').innerHTML = '<span class="material-symbols-outlined">&#xe5d5;</span> Ulangi Tes';
         }
+
+        // Close clear confirm modal when clicking backdrop
+        const clearModal = document.getElementById('clear-confirm-modal');
+        if (clearModal) {
+            clearModal.addEventListener('click', (e) => {
+                if (e.target === clearModal) closeClearModal();
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeClearModal();
+        });
     </script>
 </body>
 

@@ -3,6 +3,7 @@ const cors = require('cors');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process');
 
 const app = express();
@@ -301,6 +302,27 @@ app.get('/api/devices', (req, res) => {
     } else {
         res.json(cachedDevices);
     }
+});
+
+app.get('/api/my-ip', (req, res) => {
+    let clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+    if (clientIp.startsWith('::ffff:')) {
+        clientIp = clientIp.substring(7);
+    }
+    
+    if (clientIp === '::1' || clientIp === '127.0.0.1' || clientIp === 'localhost') {
+        const interfaces = os.networkInterfaces();
+        for (const name of Object.keys(interfaces)) {
+            for (const iface of interfaces[name]) {
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    clientIp = iface.address;
+                    break;
+                }
+            }
+        }
+    }
+    
+    res.json({ ip: clientIp || '-' });
 });
 
 // Jalankan Ngrok otomatis jika ada token

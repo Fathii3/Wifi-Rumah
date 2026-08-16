@@ -2,7 +2,7 @@
 function formatISPName(rawName) {
     if (!rawName) return "Jaringan Lokal";
     const name = rawName.toLowerCase();
-    
+
     if (name.includes("telekomunikasi selular") || name.includes("telkomsel")) return "Telkomsel";
     if (name.includes("telekomunikasi indonesia") || name.includes("telkom indonesia")) return "IndiHome (Telkom)";
     if (name.includes("eka mas republik") || name.includes("myrepublic")) return "MyRepublic";
@@ -15,22 +15,22 @@ function formatISPName(rawName) {
     if (name.includes("mnc kabel") || name.includes("mnc play")) return "MNC Play";
     if (name.includes("smartfren")) return "Smartfren";
     if (name.includes("indonesia comnets plus") || name.includes("icon")) return "ICONNET";
-    
+
     return rawName;
 }
 
 async function detectISP() {
     const ispElements = document.querySelectorAll('.isp-name-display');
     const cityElements = document.querySelectorAll('.isp-city-display');
-    
+
     const removeSkeleton = (el) => {
-        el.classList.remove('animate-pulse', 'bg-black/10', 'bg-primary/20', 'h-4', 'h-5', 'w-20', 'w-24', 'w-28', 'inline-block', 'rounded', 'mt-1');
+        el.classList.remove('animate-pulse', 'bg-black/10', 'bg-primary/20', 'bg-primary/15', 'bg-neu-dark/20', 'h-4', 'h-5', 'w-20', 'w-24', 'w-28', 'inline-block', 'rounded', 'mt-1');
     };
 
     try {
         const response = await fetch('https://ipwho.is/');
         const data = await response.json();
-        
+
         if (data.success) {
             let ispName = formatISPName(data.connection.isp || data.connection.org || "Jaringan Lokal");
             const cityName = data.city || "Lokasi Tidak Diketahui";
@@ -45,6 +45,58 @@ async function detectISP() {
     }
 }
 
+// Deteksi IP lokal jaringan (WebRTC -> fallback IP publik)
+async function detectLocalIP() {
+    const localIpElements = document.querySelectorAll('.local-ip-display');
+    if (localIpElements.length === 0) return;
+
+    const removeSkeleton = (el) => {
+        el.classList.remove('animate-pulse', 'bg-neu-dark/20', 'h-3.5', 'w-24', 'inline-block', 'rounded', 'mt-1');
+    };
+
+    let found = false;
+
+    // Cara 1: WebRTC (works di jaringan lokal, bisa diblokir di HTTPS)
+    try {
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.createDataChannel('');
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        await new Promise((resolve) => {
+            const timeout = setTimeout(() => resolve(), 3000);
+            pc.onicecandidate = (e) => {
+                if (!e.candidate) { clearTimeout(timeout); resolve(); return; }
+                const parts = e.candidate.candidate.split(' ');
+                const ip = parts[4];
+                if (ip && /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(ip)) {
+                    localIpElements.forEach(el => { removeSkeleton(el); el.innerText = ip; });
+                    found = true;
+                    clearTimeout(timeout);
+                    resolve();
+                }
+            };
+        });
+        pc.close();
+    } catch (e) {}
+
+    // Cara 2: Fallback ke IP publik dari ipwho.is (sudah di-cache oleh detectISP)
+    if (!found) {
+        try {
+            const res = await fetch('https://ipwho.is/');
+            const data = await res.json();
+            if (data.success && data.ip) {
+                localIpElements.forEach(el => { removeSkeleton(el); el.innerText = data.ip; });
+                found = true;
+            }
+        } catch (e) {}
+    }
+
+    if (!found) {
+        localIpElements.forEach(el => { removeSkeleton(el); el.innerText = 'Tidak tersedia'; });
+    }
+}
+
 function isHomePage() {
     const path = window.location.pathname;
     return path === '' || path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path.endsWith('index.html');
@@ -55,7 +107,7 @@ let blockedTimerInterval = null;
 
 function startBlockedCountdown(blockedTimestamp) {
     if (blockedTimerInterval) clearInterval(blockedTimerInterval);
-    
+
     const timerElement = document.getElementById('blocked-timer');
     if (!timerElement) return;
 
@@ -88,7 +140,7 @@ function startBlockedCountdown(blockedTimestamp) {
 function checkAccessStatus() {
     const status = localStorage.getItem('wifi_access_status');
     const timestamp = localStorage.getItem('wifi_access_time');
-    
+
     if (timestamp) {
         const now = Date.now();
         const diff = now - parseInt(timestamp);
@@ -118,11 +170,11 @@ function checkAccessStatus() {
         if (screenIntro) screenIntro.classList.add('hidden');
         if (screenBlocked) screenBlocked.classList.add('hidden');
         if (screenBeranda) screenBeranda.classList.remove('hidden');
-        
+
         if (typeof initWifiConfig === 'function') {
             initWifiConfig();
         }
-        
+
     } else if (status === 'blocked') {
         if (!isHomePage()) {
             window.location.href = 'index.html';
@@ -153,7 +205,7 @@ function handleContinue() {
     const text = document.getElementById('modal-text');
     const spinner = document.getElementById('modal-spinner');
     const content = document.getElementById('modal-content');
-    
+
     const existingActions = document.getElementById('modal-actions');
     if (existingActions) existingActions.remove();
 
@@ -161,18 +213,18 @@ function handleContinue() {
     spinner.classList.remove('hidden');
     title.innerText = "Memproses Izin...";
     text.innerText = "Sedang memeriksa status perangkat Anda di jaringan Keluarga Pak Harun.";
-    
+
     setTimeout(() => {
         spinner.classList.add('hidden');
         title.innerText = "Izin Penggunaan";
         text.innerText = "Apakah Anda sudah meminta izin memakai Wi-Fi ini kepada pemilik rumah?";
-        
+
         const actions = document.createElement('div');
         actions.id = "modal-actions";
         actions.className = "flex gap-3 mt-2";
         actions.innerHTML = `
-            <button onclick="blockAccess()" class="flex-1 bg-error-container text-on-error-container py-3 rounded-xl font-semibold text-sm hover:brightness-95 transition-all">Belum</button>
-            <button onclick="grantAccess()" class="flex-1 bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-primary-container transition-all shadow-lg shadow-primary/20">Sudah</button>
+            <button onclick="blockAccess()" class="flex-1 neu-btn-ghost text-error py-3 rounded-xl font-semibold text-sm">Belum</button>
+            <button onclick="grantAccess()" class="flex-1 neu-btn-primary py-3 rounded-xl font-semibold text-sm">Sudah</button>
         `;
         content.appendChild(actions);
     }, 1500);
@@ -198,15 +250,15 @@ function updateActiveNav() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         const target = btn.getAttribute('href');
         if (!target) return;
-        
+
         if (currentPath.includes(target) || (target === 'index.html' && (currentPath.endsWith('/') || currentPath === ''))) {
             btn.classList.add('text-primary', 'scale-110');
-            btn.classList.remove('text-on-surface-variant');
+            btn.classList.remove('text-on-surface-variant', 'text-text-muted');
             const icon = btn.querySelector('span:first-child');
             if (icon) icon.style.fontVariationSettings = "'FILL' 1";
         } else {
             btn.classList.remove('text-primary', 'scale-110');
-            btn.classList.add('text-on-surface-variant');
+            btn.classList.add('text-text-muted');
             const icon = btn.querySelector('span:first-child');
             if (icon) icon.style.fontVariationSettings = "'FILL' 0";
         }
@@ -218,6 +270,7 @@ function initApp() {
     checkAccessStatus();
     updateActiveNav();
     detectISP();
+    detectLocalIP();
 }
 
 if (document.readyState === 'loading') {

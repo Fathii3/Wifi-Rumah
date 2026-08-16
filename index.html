@@ -22,62 +22,55 @@
             theme: {
                 extend: {
                     "colors": {
-                        "on-tertiary-container": "#fcfcff",
-                        "on-background": "#0b1c30",
-                        "primary-fixed-dim": "#c0c1ff",
-                        "on-tertiary-fixed-variant": "#004c6e",
-                        "on-error": "#ffffff",
-                        "surface-container-high": "#dce9ff",
-                        "tertiary-fixed": "#c9e6ff",
-                        "surface-container-lowest": "#ffffff",
-                        "on-secondary-fixed": "#23005c",
-                        "on-tertiary-fixed": "#001e2f",
-                        "secondary-container": "#8455ef",
-                        "on-secondary-fixed-variant": "#5516be",
-                        "error": "#ba1a1a",
-                        "primary": "#4648d4",
-                        "on-primary": "#ffffff",
-                        "background": "#f8f9ff",
-                        "on-error-container": "#93000a",
-                        "inverse-primary": "#c0c1ff",
-                        "outline": "#767586",
-                        "on-surface": "#0b1c30",
-                        "inverse-surface": "#213145",
-                        "primary-container": "#6063ee",
-                        "primary-fixed": "#e1e0ff",
-                        "on-primary-fixed": "#07006c",
-                        "surface-variant": "#d3e4fe",
-                        "on-primary-container": "#fffbff",
-                        "on-primary-fixed-variant": "#2f2ebe",
-                        "secondary-fixed-dim": "#d0bcff",
-                        "on-secondary-container": "#fffbff",
-                        "tertiary-fixed-dim": "#89ceff",
-                        "tertiary": "#00628d",
-                        "tertiary-container": "#007cb1",
-                        "on-surface-variant": "#464554",
-                        "surface": "#f8f9ff",
-                        "surface-container-low": "#eff4ff",
-                        "surface-bright": "#f8f9ff",
-                        "surface-container-highest": "#d3e4fe",
-                        "surface-dim": "#cbdbf5",
-                        "surface-container": "#e5eeff",
-                        "inverse-on-surface": "#eaf1ff",
-                        "on-secondary": "#ffffff",
+                        /* Neumorphism Palette */
+                        "neu-bg": "#e0e5ec",
+                        "neu-surface": "#e0e5ec",
+                        "neu-light": "#ffffff",
+                        "neu-dark": "#a3b1c6",
+                        "neu-darker": "#8fa0b8",
+
+                        /* Text */
+                        "text-primary": "#2d3748",
+                        "text-muted": "#64748b",
+                        "text-subtle": "#8a99ad",
+
+                        /* Brand & Semantic */
+                        "primary": "#4f46e5",
+                        "primary-dark": "#4338ca",
                         "secondary": "#6b38d4",
-                        "surface-tint": "#494bd6",
-                        "on-tertiary": "#ffffff",
-                        "error-container": "#ffdad6",
-                        "outline-variant": "#c7c4d7",
-                        "secondary-fixed": "#e9ddff",
-                        "glow-indigo": "#E0E7FF",
-                        "glow-purple": "#F3E8FF",
-                        "border-glass": "rgba(0, 0, 0, 0.08)",
-                        "surface-glass": "rgba(255, 255, 255, 0.6)"
+                        "error": "#ef4444",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "cyan-accent": "#06b6d4",
+
+                        /* Legacy compatibility mappings */
+                        "on-primary": "#ffffff",
+                        "on-surface": "#2d3748",
+                        "on-surface-variant": "#64748b",
+                        "on-background": "#2d3748",
+                        "background": "#e0e5ec",
+                        "surface": "#e0e5ec",
+                        "surface-container-high": "#d5dbe5",
+                        "surface-variant": "#cdd4df",
+                        "primary-container": "#5b52e0",
+                        "on-primary-container": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#ffffff",
+                        "secondary-container": "#7b4fe0",
+                        "on-error": "#ffffff",
+                        "error-container": "#fde8e8",
+                        "on-error-container": "#b91c1c",
+                        "outline": "#94a3b8",
+                        "outline-variant": "#b8c4d4",
+                        "inverse-surface": "#334155",
+                        "inverse-on-surface": "#e0e5ec"
                     },
                     "borderRadius": {
                         "DEFAULT": "0.25rem",
                         "lg": "0.5rem",
                         "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
                         "full": "9999px"
                     },
                     "spacing": {
@@ -116,9 +109,9 @@
     </script>
 </head>
 
-<body class="bg-background text-on-surface font-body-lg min-h-screen overflow-x-hidden selection:bg-primary/20">
+<body class="bg-neu-bg text-text-primary font-body-lg min-h-screen overflow-x-hidden selection:bg-primary/20">
 
-    <!-- SVG Liquid Glass Filter Definition -->
+    <!-- SVG Filter Definition (kept for icon effects) -->
     <svg class="svg-hidden-defs" aria-hidden="true" focusable="false">
         <defs>
             <filter id="liquid-glass" x="-30%" y="-30%" width="160%" height="160%">
@@ -138,63 +131,50 @@
         </defs>
     </svg>
 
-
-    <!-- Atmospheric Background Elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-base" id="bg-elements">
-        <div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-glow-indigo rounded-full bg-glow"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-glow-purple rounded-full bg-glow"></div>
-        <div class="absolute top-[30%] right-[20%] w-[40%] h-[40%] bg-primary/10 rounded-full bg-glow"></div>
-        <!-- Floating Crystalline Shapes -->
-        <div class="absolute top-[15%] left-[20%] w-16 h-16 glass-panel rounded-2xl rotate-12 animate-pulse opacity-40">
-        </div>
-        <div class="absolute bottom-[25%] left-[10%] w-24 h-24 glass-panel rounded-full animate-bounce animate-duration-8s opacity-30"></div>
-        <div class="absolute top-[40%] right-[15%] w-12 h-12 glass-panel rounded-xl -rotate-12 opacity-40"></div>
-    </div>
-
     <!-- SCREEN INTRO -->
     <div id="screen-intro"
         class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-12 pb-36 md:pb-40 min-h-screen">
         <div
-            class="glass-panel-high rounded-[2.5rem] p-8 md:p-12 max-w-md w-full text-center animate-float flex flex-col items-center">
+            class="neu-card-xl p-8 md:p-12 max-w-md w-full text-center animate-float flex flex-col items-center">
             <!-- Logo/Icon Section -->
             <div
-                class="w-20 h-20 rounded-3xl overflow-hidden mb-8 shadow-lg shadow-primary/20 flex items-center justify-center">
+                class="w-20 h-20 rounded-3xl overflow-hidden mb-8 neu-circle flex items-center justify-center">
                 <img src="logo/logo.webp" alt="Logo Wi-Fi" class="w-full h-full object-cover" />
             </div>
             <!-- Headers -->
-            <h1 class="font-headline-md text-3xl text-on-surface mb-2">Selamat Datang!</h1>
-            <p class="font-body-md text-on-surface-variant mb-10">di Wi-Fi Keluarga Pak Harun</p>
+            <h1 class="font-headline-md text-3xl text-text-primary mb-2">Selamat Datang!</h1>
+            <p class="font-body-md text-text-muted mb-10">di Wi-Fi Keluarga Pak Harun</p>
 
             <!-- Network Info Box -->
-            <div class="glass-panel rounded-[1.5rem] p-6 w-full text-left mb-10 border border-white/40">
+            <div class="neu-inset p-6 w-full text-left mb-10">
                 <div class="flex items-center gap-2 mb-4">
                     <span class="material-symbols-outlined text-primary text-xl">&#xe88e;</span>
                     <span class="font-headline-md text-lg text-primary">Info Jaringan:</span>
                 </div>
-                <ul class="space-y-4 font-body-md text-sm text-on-surface-variant">
+                <ul class="space-y-4 font-body-md text-sm text-text-muted">
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-secondary text-lg mt-0.5">&#xe9e4;</span>
-                        <span>Kecepatan maksimal: <strong class="text-on-surface">10 Mbps</strong></span>
+                        <span>Kecepatan maksimal: <strong class="text-text-primary">10 Mbps</strong></span>
                     </li>
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-secondary text-lg mt-0.5">&#xe7ef;</span>
-                        <span>Kapasitas optimal: <strong class="text-on-surface">3-5 perangkat</strong></span>
+                        <span>Kapasitas optimal: <strong class="text-text-primary">3-5 perangkat</strong></span>
                     </li>
                     <li class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-secondary text-lg mt-0.5">&#xe8e8;</span>
                         <span>Gunakan internet dengan bijaksana.</span>
                     </li>
-                    <li class="flex items-start gap-3 mt-4 pt-4 border-t border-black/10">
+                    <li class="flex items-start gap-3 mt-4 pt-4 border-t border-neu-dark/20">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5">&#xe328;</span>
                         <span
-                            class="isp-name-display font-semibold text-primary inline-block h-4 w-24 bg-primary/20 animate-pulse rounded"></span>
+                            class="isp-name-display font-semibold text-primary inline-block h-4 w-24 bg-primary/15 animate-pulse rounded"></span>
                     </li>
                 </ul>
             </div>
 
             <!-- CTA Button -->
             <button
-                class="w-full bg-primary hover:bg-primary-container text-white font-headline-md py-5 px-6 rounded-2xl transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 group shadow-xl shadow-primary/25"
+                class="w-full neu-btn-primary font-headline-md py-5 px-6 rounded-2xl flex items-center justify-center gap-2 group text-lg"
                 onclick="handleContinue()">
                 Lanjut
                 <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">&#xe5c8;</span>
@@ -206,21 +186,21 @@
     <div id="screen-blocked"
         class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-12 pb-36 md:pb-40 min-h-screen hidden">
         <div
-            class="glass-panel-high rounded-[2.5rem] p-8 md:p-12 max-w-md w-full text-center flex flex-col items-center shadow-[0_0_40px_rgba(186,26,26,0.15)] border-error/20">
+            class="neu-card-xl p-8 md:p-12 max-w-md w-full text-center flex flex-col items-center">
             <div
-                class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-8 shadow-lg shadow-error/20">
+                class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-8 neu-circle">
                 <span class="material-symbols-outlined text-error text-4xl">&#xe14b;</span>
             </div>
             <h1 class="font-headline-md text-3xl text-error mb-2">Akses Ditolak</h1>
-            <p class="font-body-md text-on-surface-variant mb-6">Anda belum mendapatkan izin dari pemilik rumah untuk
+            <p class="font-body-md text-text-muted mb-6">Anda belum mendapatkan izin dari pemilik rumah untuk
                 menggunakan jaringan Wi-Fi ini.</p>
-            <div class="bg-error/5 border border-error/10 p-4 rounded-xl w-full mb-8">
+            <div class="neu-inset-sm p-4 w-full mb-8">
                 <p class="text-sm font-semibold text-error mb-1">Perangkat Diblokir Sementara</p>
-                <p class="text-xs text-on-surface-variant" id="blocked-timer">Silakan coba lagi setelah 24 jam atau
+                <p class="text-xs text-text-muted" id="blocked-timer">Silakan coba lagi setelah 24 jam atau
                     hubungi pemilik rumah secara langsung.</p>
             </div>
             <button
-                class="w-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-headline-md py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
+                class="w-full neu-btn-ghost font-headline-md py-4 px-6 rounded-2xl flex items-center justify-center gap-2"
                 onclick="location.reload()">
                 <span class="material-symbols-outlined">&#xe5d5;</span> Muat Ulang
             </button>
@@ -233,29 +213,29 @@
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center z-10">
             <div class="text-center mb-8 space-y-2">
                 <h2 class="font-display-lg text-headline-lg-mobile md:text-display-lg text-primary">Wi-Fi Connect</h2>
-                <p class="text-on-surface-variant font-body-lg">Pilih metode untuk terhubung ke jaringan</p>
+                <p class="text-text-muted font-body-lg">Pilih metode untuk terhubung ke jaringan</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                 <!-- QR Code Option -->
                 <div
-                    class="glass-panel-high rounded-3xl p-6 group flex flex-col items-center text-center btn-hover-effect">
+                    class="neu-card p-6 group flex flex-col items-center text-center btn-hover-effect">
                     <div
-                        class="relative w-auto h-auto rounded-2xl p-3 bg-white mb-4 shadow-sm border border-black/5 flex items-center justify-center overflow-hidden min-h-[160px] min-w-[160px]">
+                        class="relative w-auto h-auto rounded-2xl p-3 mb-4 flex items-center justify-center overflow-hidden min-h-[160px] min-w-[160px] neu-qr-pedestal">
                         <div id="qrcode" class="flex items-center justify-center"></div>
                     </div>
-                    <h3 class="font-headline-lg-mobile md:text-xl text-on-background font-bold mb-2">QR Code</h3>
-                    <p class="text-on-surface-variant mb-6 font-body-md text-xs">Pindai kode QR untuk terhubung secara
+                    <h3 class="font-headline-lg-mobile md:text-xl text-text-primary font-bold mb-2">QR Code</h3>
+                    <p class="text-text-muted mb-6 font-body-md text-xs">Pindai kode QR untuk terhubung secara
                         instan tanpa mengetik sandi.</p>
                     <div class="mt-auto w-full flex flex-col gap-3">
                         <button
-                            class="w-full bg-primary text-on-primary py-3 rounded-xl font-semibold btn-hover-effect flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                            class="w-full neu-btn-primary py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
                             onclick="downloadQR()">
                             <span class="material-symbols-outlined">&#xf090;</span>
                             Unduh QR
                         </button>
                         <button
-                            class="w-full glass-panel border-primary/20 text-primary py-3 rounded-xl font-semibold btn-hover-effect flex items-center justify-center gap-2"
+                            class="w-full neu-btn-ghost text-primary py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
                             onclick="verifyAction('scanner')">
                             <span class="material-symbols-outlined">&#xe3b5;</span>
                             Buka Scanner
@@ -265,29 +245,29 @@
 
                 <!-- Password Option -->
                 <div
-                    class="glass-panel-high rounded-3xl p-6 group flex flex-col items-center text-center btn-hover-effect">
-                    <div class="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4">
+                    class="neu-card p-6 group flex flex-col items-center text-center btn-hover-effect">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 neu-circle">
                         <span class="material-symbols-outlined icon-fill-1 text-[36px] text-secondary">&#xe73c;</span>
                     </div>
-                    <h3 class="font-headline-lg-mobile md:text-xl text-on-background font-bold mb-2">Kata Sandi</h3>
-                    <p class="text-on-surface-variant mb-6 font-body-md text-xs">Salin kata sandi Wi-Fi dan masukkan di
+                    <h3 class="font-headline-lg-mobile md:text-xl text-text-primary font-bold mb-2">Kata Sandi</h3>
+                    <p class="text-text-muted mb-6 font-body-md text-xs">Salin kata sandi Wi-Fi dan masukkan di
                         pengaturan perangkat Anda.</p>
                     <div class="mt-auto w-full flex flex-col gap-3">
                         <div
-                            class="w-full bg-white/40 border border-white px-4 py-3 rounded-xl flex items-center justify-between">
+                            class="w-full neu-inset-sm px-4 py-3 rounded-xl flex items-center justify-between">
                             <span class="text-secondary font-mono tracking-widest font-bold"
                                 id="wifi-password-display">********</span>
-                            <span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer"
+                            <span class="material-symbols-outlined text-text-muted text-sm cursor-pointer"
                                 onclick="togglePasswordVisibility()" id="pwd-eye">&#xe8f4;</span>
                         </div>
                         <button
-                            class="w-full bg-secondary text-on-secondary py-3 rounded-xl font-semibold btn-hover-effect flex items-center justify-center gap-2 shadow-lg shadow-secondary/20"
+                            class="w-full neu-btn-secondary py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
                             onclick="copyPassword()" id="copy-btn">
                             <span class="material-symbols-outlined">&#xe14d;</span>
                             Salin Sandi
                         </button>
                         <button
-                            class="w-full glass-panel border-secondary/20 text-secondary py-3 rounded-xl font-semibold btn-hover-effect flex items-center justify-center gap-2"
+                            class="w-full neu-btn-ghost text-secondary py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
                             onclick="verifyAction('wifi')">
                             <span class="material-symbols-outlined">&#xe8b8;</span>
                             Pengaturan Wi-Fi
@@ -298,35 +278,35 @@
 
             <!-- Network Info Summary -->
             <div
-                class="mt-8 glass-panel rounded-2xl p-4 flex flex-wrap items-center gap-4 w-full border-dashed border-primary/30 justify-between md:justify-start">
+                class="mt-8 neu-card-sm p-4 flex flex-wrap items-center gap-4 w-full justify-between md:justify-start">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined icon-fill-1 text-green-600 text-xl">&#xe86c;</span>
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center neu-circle">
+                        <span class="material-symbols-outlined icon-fill-1 text-success text-xl">&#xe86c;</span>
                     </div>
                     <div>
-                        <p class="font-label-caps text-on-surface-variant text-[10px] font-bold">STATUS</p>
-                        <p class="font-bold text-sm text-on-surface" id="wifi-name-display">Wi-Fi Connect</p>
+                        <p class="font-label-caps text-text-subtle text-[10px] font-bold">STATUS</p>
+                        <p class="font-bold text-sm text-text-primary" id="wifi-name-display">Wi-Fi Connect</p>
                     </div>
                 </div>
-                <div class="h-8 w-px bg-black/5 hidden md:block"></div>
+                <div class="h-8 w-px bg-neu-dark/30 hidden md:block"></div>
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-blue-600 text-xl">&#xe9e4;</span>
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center neu-circle">
+                        <span class="material-symbols-outlined text-cyan-accent text-xl">&#xe9e4;</span>
                     </div>
                     <div>
-                        <p class="font-label-caps text-on-surface-variant text-[10px] font-bold">KECEPATAN</p>
-                        <p class="font-bold text-sm text-on-surface">Up to 10 Mbps</p>
+                        <p class="font-label-caps text-text-subtle text-[10px] font-bold">KECEPATAN</p>
+                        <p class="font-bold text-sm text-text-primary">Up to 10 Mbps</p>
                     </div>
                 </div>
-                <div class="h-8 w-px bg-black/5 hidden md:block"></div>
+                <div class="h-8 w-px bg-neu-dark/30 hidden md:block"></div>
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-purple-600 text-xl">&#xe328;</span>
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center neu-circle">
+                        <span class="material-symbols-outlined text-secondary text-xl">&#xe328;</span>
                     </div>
                     <div>
-                        <p class="font-label-caps text-on-surface-variant text-[10px] font-bold">ISP</p>
+                        <p class="font-label-caps text-text-subtle text-[10px] font-bold">ISP</p>
                         <p
-                            class="font-bold text-sm text-on-surface isp-name-display inline-block h-4 w-24 bg-black/10 animate-pulse rounded">
+                            class="font-bold text-sm text-text-primary isp-name-display inline-block h-4 w-24 bg-neu-dark/20 animate-pulse rounded">
                         </p>
                     </div>
                 </div>
@@ -335,24 +315,23 @@
     </div>
 
     <!-- ============================================== -->
-    <!-- GLOBAL BUBBLE NAVBAR (DESKTOP & MOBILE)        -->
+    <!-- GLOBAL BUBBLE NAVBAR (Neumorphic)              -->
     <!-- ============================================== -->
-    <!-- We removed md:hidden to make it appear on Desktop as well -->
     <div class="fixed bottom-6 left-0 w-full z-50 flex justify-center pointer-events-none px-4">
         <nav
-            class="pointer-events-auto flex justify-between items-center px-6 py-2 gap-4 md:gap-10 bg-white/80 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-full">
+            class="pointer-events-auto flex justify-between items-center px-6 py-2 gap-4 md:gap-10 neu-navbar">
             <a href="index.html"
-                class="nav-btn flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-on-surface-variant hover:text-primary">
+                class="nav-btn neu-nav-item active flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-primary">
                 <span class="material-symbols-outlined text-[28px]">&#xe587;</span>
                 <span class="text-[10px] font-bold uppercase mt-1">Beranda</span>
             </a>
             <a href="kecepatan.html"
-                class="nav-btn flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-on-surface-variant hover:text-primary">
+                class="nav-btn neu-nav-item flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-text-muted hover:text-primary">
                 <span class="material-symbols-outlined text-[28px]">&#xe9e4;</span>
                 <span class="text-[10px] font-bold uppercase mt-1">Speed</span>
             </a>
             <a href="perangkat.html"
-                class="nav-btn flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-on-surface-variant hover:text-primary">
+                class="nav-btn neu-nav-item flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-text-muted hover:text-primary">
                 <span class="material-symbols-outlined text-[28px]">&#xe1b1;</span>
                 <span class="text-[10px] font-bold uppercase mt-1">Devices</span>
             </a>
@@ -360,36 +339,36 @@
     </div>
 
     <!-- ============================================== -->
-    <!-- MODALS & OVERLAYS                              -->
+    <!-- MODALS & OVERLAYS (Neumorphic)                 -->
     <!-- ============================================== -->
 
     <!-- Modal: Proses Izin -->
-    <div class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 bg-background/60 backdrop-blur-sm"
+    <div class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 neu-modal-overlay"
         id="modal-container">
-        <div class="glass-panel-high rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl">
+        <div class="neu-modal p-8 max-w-sm w-full text-center">
             <div class="mb-6" id="modal-spinner">
                 <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto">
                 </div>
             </div>
             <div id="modal-content">
-                <h3 class="font-headline-md mb-4 text-xl" id="modal-title">Loading...</h3>
-                <p class="font-body-md text-sm text-on-surface-variant mb-6" id="modal-text"></p>
+                <h3 class="font-headline-md mb-4 text-xl text-text-primary" id="modal-title">Loading...</h3>
+                <p class="font-body-md text-sm text-text-muted mb-6" id="modal-text"></p>
             </div>
         </div>
     </div>
 
     <!-- Verification Popup Overlay -->
     <div id="verify-popup"
-        class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 bg-background/60 backdrop-blur-sm">
-        <div class="glass-panel-high rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl">
-            <h3 class="font-headline-md mb-4 text-xl" id="verify-title">Konfirmasi</h3>
-            <p class="font-body-md text-sm text-on-surface-variant mb-6" id="verify-text">Keterangan</p>
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 neu-modal-overlay">
+        <div class="neu-modal p-8 max-w-sm w-full text-center">
+            <h3 class="font-headline-md mb-4 text-xl text-text-primary" id="verify-title">Konfirmasi</h3>
+            <p class="font-body-md text-sm text-text-muted mb-6" id="verify-text">Keterangan</p>
             <div class="flex gap-3 mt-2">
                 <button
-                    class="flex-1 bg-surface-container-high hover:bg-surface-variant text-on-surface font-semibold py-3 rounded-xl transition-all"
+                    class="flex-1 neu-btn-ghost font-semibold py-3 rounded-xl"
                     onclick="closeVerifyPopup()">Batal</button>
                 <button
-                    class="flex-1 bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-container transition-all shadow-lg shadow-primary/20"
+                    class="flex-1 neu-btn-primary font-semibold py-3 rounded-xl"
                     onclick="proceedAction()">Lanjut</button>
             </div>
         </div>
@@ -397,12 +376,12 @@
 
     <!-- General Alert Popup -->
     <div id="alert-popup"
-        class="hidden fixed inset-0 z-[110] flex items-center justify-center px-4 bg-background/60 backdrop-blur-sm">
-        <div class="glass-panel-high rounded-[2rem] p-6 max-w-sm w-full text-center shadow-2xl">
-            <h3 class="font-headline-md mb-2 text-lg" id="alert-title">Info</h3>
-            <p class="font-body-md text-sm text-on-surface-variant mb-6" id="alert-msg">Pesan</p>
+        class="hidden fixed inset-0 z-[110] flex items-center justify-center px-4 neu-modal-overlay">
+        <div class="neu-modal p-6 max-w-sm w-full text-center">
+            <h3 class="font-headline-md mb-2 text-lg text-text-primary" id="alert-title">Info</h3>
+            <p class="font-body-md text-sm text-text-muted mb-6" id="alert-msg">Pesan</p>
             <button
-                class="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-container transition-colors"
+                class="w-full neu-btn-primary font-semibold py-3 rounded-xl"
                 onclick="document.getElementById('alert-popup').classList.add('hidden')">Tutup</button>
         </div>
     </div>
@@ -466,15 +445,15 @@
                     qrOptions: { errorCorrectionLevel: 'H' },
                     dotsOptions: {
                         type: "extra-rounded",
-                        color: "#0b1c30"
+                        color: "#2d3748"
                     },
                     cornersSquareOptions: {
                         type: "extra-rounded",
-                        color: "#0b1c30"
+                        color: "#2d3748"
                     },
                     cornersDotOptions: {
                         type: "dot",
-                        color: "#0b1c30"
+                        color: "#4f46e5"
                     },
                     backgroundOptions: {
                         color: "#ffffff"
@@ -486,7 +465,7 @@
                     text: wifiString,
                     width: 150,
                     height: 150,
-                    colorDark: "#0b1c30",
+                    colorDark: "#2d3748",
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H
                 });
@@ -552,11 +531,13 @@
                     const btn = document.getElementById('copy-btn');
                     const originalHTML = btn.innerHTML;
                     btn.innerHTML = '<span class="material-symbols-outlined">&#xe5ca;</span> Tersalin!';
-                    btn.classList.replace('bg-secondary', 'bg-green-600');
+                    btn.classList.add('bg-success');
+                    btn.style.background = '#10b981';
 
                     setTimeout(() => {
                         btn.innerHTML = originalHTML;
-                        btn.classList.replace('bg-green-600', 'bg-secondary');
+                        btn.classList.remove('bg-success');
+                        btn.style.background = '';
                     }, 2000);
                 }).catch(err => {
                     showAlert("Gagal", "Gagal menyalin kata sandi. Silakan salin manual.");

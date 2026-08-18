@@ -49,12 +49,15 @@
     --neu-accent-glow: 0 0 15px rgba(79, 70, 229, 0.35);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     font-family: var(--font-primary);
 }
 
-html, body {
+html,
+body {
     font-family: var(--font-primary) !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -63,7 +66,10 @@ html, body {
     background: var(--neu-bg) !important;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
     font-family: var(--font-primary) !important;
 }
 
@@ -173,7 +179,7 @@ button, input, select, textarea {
 .neu-btn-primary {
     background: var(--accent-primary);
     color: #ffffff;
-    box-shadow: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -181,34 +187,34 @@ button, input, select, textarea {
 
 .neu-btn-primary:hover {
     background: var(--accent-primary-dark);
-    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .neu-btn-primary:active {
-    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.2), inset -3px -3px 7px rgba(255,255,255,0.1);
+    box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.2), inset -3px -3px 7px rgba(255, 255, 255, 0.1);
 }
 
 .neu-btn-secondary {
     background: var(--accent-secondary);
     color: #ffffff;
-    box-shadow: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .neu-btn-secondary:hover {
-    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .neu-btn-secondary:active {
-    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.2), inset -3px -3px 7px rgba(255,255,255,0.1);
+    box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.2), inset -3px -3px 7px rgba(255, 255, 255, 0.1);
 }
 
 .neu-btn-danger {
     background: var(--accent-danger);
     color: #ffffff;
-    box-shadow: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -216,11 +222,11 @@ button, input, select, textarea {
 
 .neu-btn-danger:hover {
     background: #dc2626;
-    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .neu-btn-danger:active {
-    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.25), inset -3px -3px 7px rgba(255,255,255,0.1);
+    box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.25), inset -3px -3px 7px rgba(255, 255, 255, 0.1);
 }
 
 .neu-btn-ghost {
@@ -365,13 +371,27 @@ button, input, select, textarea {
    Animations & Hover Utilities (Neumorphism-adapted)
    ========================================================================== */
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
 }
 
 @keyframes neu-pulse {
-    0%, 100% { box-shadow: var(--neu-raised); }
-    50% { box-shadow: var(--neu-raised-lg); }
+
+    0%,
+    100% {
+        box-shadow: var(--neu-raised);
+    }
+
+    50% {
+        box-shadow: var(--neu-raised-lg);
+    }
 }
 
 .animate-float {
@@ -519,3 +539,22 @@ button:hover .material-symbols-outlined {
     background: var(--accent-primary);
 }
 
+/* Skeleton Loading Shimmer */
+.skeleton-shimmer {
+    background: linear-gradient(90deg,
+            rgba(224, 229, 236, 0.8) 0%,
+            rgba(255, 255, 255, 0.9) 50%,
+            rgba(224, 229, 236, 0.8) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

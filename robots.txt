@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wifi.fetyy.my.id/sitemap.xml

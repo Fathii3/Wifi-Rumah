@@ -4,14 +4,59 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Wi-Fi Connect</title>
+    <title>Wi-Fi Rumah — Portal Tamu & Speed Test by Fathi Fadhil | Fetty Wi-Fi</title>
+    <meta name="description"
+        content="Wi-Fi Rumah by Fathi Fadhil (Fetty Wi-Fi) — Portal tamu interaktif, scan QR Code Wi-Fi otomatis, speed wifi test real-time, dan pemantauan perangkat terhubung." />
+    <meta name="keywords"
+        content="fetty wifi, wifi rumah, fathi fadhil, speed wifi, speedtest wifi rumah, wifi pak harun, wifi fetyy, wifi keluarga pak harun, scan qr wifi, portal tamu wifi, cek kecepatan wifi, pantau perangkat wifi, wifi.fetyy.my.id" />
+    <meta name="author" content="Fathi Fadhil" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://wifi.fetyy.my.id/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wifi.fetyy.my.id/" />
+    <meta property="og:title" content="Wi-Fi Rumah - Portal Tamu & Speed Test by Fathi Fadhil | Fetty Wi-Fi" />
+    <meta property="og:description"
+        content="Portal tamu Wi-Fi interaktif, cek speed wifi real-time, scan QR Code otomatis, dan pemantauan jaringan lokal." />
+    <meta property="og:image" content="https://wifi.fetyy.my.id/logo/logo.webp" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://wifi.fetyy.my.id/" />
+    <meta property="twitter:title" content="Wi-Fi Rumah — Portal Tamu & Speed Test by Fathi Fadhil | Fetty Wi-Fi" />
+    <meta property="twitter:description"
+        content="Portal tamu Wi-Fi interaktif, cek speed wifi real-time, scan QR Code otomatis, dan pemantauan jaringan lokal." />
+    <meta property="twitter:image" content="https://wifi.fetyy.my.id/logo/logo.webp" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Wi-Fi Rumah - Fetty Wi-Fi",
+      "alternateName": ["Fetty Wi-Fi", "Wi-Fi Rumah Pak Harun", "Wi-Fi Fathi Fadhil", "Wi-Fi Connect"],
+      "author": {
+        "@type": "Person",
+        "name": "Fathi Fadhil"
+      },
+      "url": "https://wifi.fetyy.my.id/",
+      "description": "Portal tamu Wi-Fi interaktif, cek speed wifi, scan QR Code otomatis, dan pemantauan jaringan lokal.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All"
+    }
+    </script>
+
     <link rel="icon" type="image/webp" href="logo/logo.webp" />
     <link rel="apple-touch-icon" href="logo/logo.webp" />
     <!-- Preconnect for fast, non-blocking font loading across all browsers -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -134,12 +179,19 @@
     <!-- SCREEN INTRO -->
     <div id="screen-intro"
         class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-12 pb-36 md:pb-40 min-h-screen">
-        <div
-            class="neu-card-xl p-8 md:p-12 max-w-md w-full text-center animate-float flex flex-col items-center">
-            <!-- Logo/Icon Section -->
+        <div class="neu-card-xl p-8 md:p-12 max-w-md w-full text-center animate-float flex flex-col items-center">
+            <!-- Logo/Icon Section with Skeleton Loading -->
             <div
-                class="w-20 h-20 rounded-3xl overflow-hidden mb-8 neu-circle flex items-center justify-center">
-                <img src="logo/logo.webp" alt="Logo Wi-Fi" class="w-full h-full object-cover" />
+                class="relative w-20 h-20 rounded-3xl overflow-hidden mb-8 neu-circle flex items-center justify-center bg-neu-surface">
+                <!-- Skeleton Placeholder -->
+                <div id="logo-skeleton"
+                    class="absolute inset-0 skeleton-shimmer z-10 flex items-center justify-center transition-opacity duration-300">
+                    <span class="material-symbols-outlined text-text-subtle/30 text-2xl animate-pulse">&#xe63e;</span>
+                </div>
+                <!-- Animated GIF Logo -->
+                <img id="logo-img" src="logo/animasi-logo.gif" alt="Logo Wi-Fi"
+                    class="w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-out"
+                    onload="handleLogoLoaded(this)" onerror="handleLogoError(this)" />
             </div>
             <!-- Headers -->
             <h1 class="font-headline-md text-3xl text-text-primary mb-2">Selamat Datang!</h1>
@@ -185,10 +237,8 @@
     <!-- SCREEN BLOCKED -->
     <div id="screen-blocked"
         class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-12 pb-36 md:pb-40 min-h-screen hidden">
-        <div
-            class="neu-card-xl p-8 md:p-12 max-w-md w-full text-center flex flex-col items-center">
-            <div
-                class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-8 neu-circle">
+        <div class="neu-card-xl p-8 md:p-12 max-w-md w-full text-center flex flex-col items-center">
+            <div class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-8 neu-circle">
                 <span class="material-symbols-outlined text-error text-4xl">&#xe14b;</span>
             </div>
             <h1 class="font-headline-md text-3xl text-error mb-2">Akses Ditolak</h1>
@@ -218,8 +268,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                 <!-- QR Code Option -->
-                <div
-                    class="neu-card p-6 group flex flex-col items-center text-center btn-hover-effect">
+                <div class="neu-card p-6 group flex flex-col items-center text-center btn-hover-effect">
                     <div
                         class="relative w-auto h-auto rounded-2xl p-3 mb-4 flex items-center justify-center overflow-hidden min-h-[160px] min-w-[160px] neu-qr-pedestal">
                         <div id="qrcode" class="flex items-center justify-center"></div>
@@ -244,8 +293,7 @@
                 </div>
 
                 <!-- Password Option -->
-                <div
-                    class="neu-card p-6 group flex flex-col items-center text-center btn-hover-effect">
+                <div class="neu-card p-6 group flex flex-col items-center text-center btn-hover-effect">
                     <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 neu-circle">
                         <span class="material-symbols-outlined icon-fill-1 text-[36px] text-secondary">&#xe73c;</span>
                     </div>
@@ -253,8 +301,7 @@
                     <p class="text-text-muted mb-6 font-body-md text-xs">Salin kata sandi Wi-Fi dan masukkan di
                         pengaturan perangkat Anda.</p>
                     <div class="mt-auto w-full flex flex-col gap-3">
-                        <div
-                            class="w-full neu-inset-sm px-4 py-3 rounded-xl flex items-center justify-between">
+                        <div class="w-full neu-inset-sm px-4 py-3 rounded-xl flex items-center justify-between">
                             <span class="text-secondary font-mono tracking-widest font-bold"
                                 id="wifi-password-display">********</span>
                             <span class="material-symbols-outlined text-text-muted text-sm cursor-pointer"
@@ -277,8 +324,7 @@
             </div>
 
             <!-- Network Info Summary -->
-            <div
-                class="mt-8 neu-card-sm p-4 flex flex-wrap items-center gap-4 w-full justify-between md:justify-start">
+            <div class="mt-8 neu-card-sm p-4 flex flex-wrap items-center gap-4 w-full justify-between md:justify-start">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center neu-circle">
                         <span class="material-symbols-outlined icon-fill-1 text-success text-xl">&#xe86c;</span>
@@ -318,8 +364,7 @@
     <!-- GLOBAL BUBBLE NAVBAR (Neumorphic)              -->
     <!-- ============================================== -->
     <div class="fixed bottom-6 left-0 w-full z-50 flex justify-center pointer-events-none px-4">
-        <nav
-            class="pointer-events-auto flex justify-between items-center px-6 py-2 gap-4 md:gap-10 neu-navbar">
+        <nav class="pointer-events-auto flex justify-between items-center px-6 py-2 gap-4 md:gap-10 neu-navbar">
             <a href="index.html"
                 class="nav-btn neu-nav-item active flex flex-col items-center justify-center p-2 transition-all cursor-pointer text-primary">
                 <span class="material-symbols-outlined text-[28px]">&#xe587;</span>
@@ -358,30 +403,25 @@
     </div>
 
     <!-- Verification Popup Overlay -->
-    <div id="verify-popup"
-        class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 neu-modal-overlay">
+    <div id="verify-popup" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 neu-modal-overlay">
         <div class="neu-modal p-8 max-w-sm w-full text-center">
             <h3 class="font-headline-md mb-4 text-xl text-text-primary" id="verify-title">Konfirmasi</h3>
             <p class="font-body-md text-sm text-text-muted mb-6" id="verify-text">Keterangan</p>
             <div class="flex gap-3 mt-2">
-                <button
-                    class="flex-1 neu-btn-ghost font-semibold py-3 rounded-xl"
+                <button class="flex-1 neu-btn-ghost font-semibold py-3 rounded-xl"
                     onclick="closeVerifyPopup()">Batal</button>
-                <button
-                    class="flex-1 neu-btn-primary font-semibold py-3 rounded-xl"
+                <button class="flex-1 neu-btn-primary font-semibold py-3 rounded-xl"
                     onclick="proceedAction()">Lanjut</button>
             </div>
         </div>
     </div>
 
     <!-- General Alert Popup -->
-    <div id="alert-popup"
-        class="hidden fixed inset-0 z-[110] flex items-center justify-center px-4 neu-modal-overlay">
+    <div id="alert-popup" class="hidden fixed inset-0 z-[110] flex items-center justify-center px-4 neu-modal-overlay">
         <div class="neu-modal p-6 max-w-sm w-full text-center">
             <h3 class="font-headline-md mb-2 text-lg text-text-primary" id="alert-title">Info</h3>
             <p class="font-body-md text-sm text-text-muted mb-6" id="alert-msg">Pesan</p>
-            <button
-                class="w-full neu-btn-primary font-semibold py-3 rounded-xl"
+            <button class="w-full neu-btn-primary font-semibold py-3 rounded-xl"
                 onclick="document.getElementById('alert-popup').classList.add('hidden')">Tutup</button>
         </div>
     </div>
@@ -591,6 +631,33 @@
                 window.location.href = "https://www.google.com";
             }, 2500);
         }
+
+        // Logo Skeleton Loading Handlers
+        function handleLogoLoaded(img) {
+            img.classList.remove('opacity-0');
+            img.classList.add('opacity-100');
+            const skeleton = document.getElementById('logo-skeleton');
+            if (skeleton) {
+                skeleton.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    if (skeleton) skeleton.style.display = 'none';
+                }, 350);
+            }
+        }
+
+        function handleLogoError(img) {
+            const skeleton = document.getElementById('logo-skeleton');
+            if (skeleton) {
+                skeleton.innerHTML = '<span class="material-symbols-outlined text-primary text-3xl">&#xe63e;</span>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const logo = document.getElementById('logo-img');
+            if (logo && logo.complete && logo.naturalHeight !== 0) {
+                handleLogoLoaded(logo);
+            }
+        });
     </script>
     <script src="app.js"></script>
 </body>

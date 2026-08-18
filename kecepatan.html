@@ -4,7 +4,20 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Wi-Fi Connect - Kecepatan</title>
+    <title>Speed Wi-Fi — Uji Kecepatan Internet by Fathi Fadhil | Fetty Wi-Fi</title>
+    <meta name="description" content="Speed Wi-Fi Test real-time by Fathi Fadhil (Fetty Wi-Fi) — Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah dengan akurat." />
+    <meta name="keywords" content="speed wifi, fetty wifi, wifi rumah, fathi fadhil, speedtest wifi rumah, cek speed wifi, tes kecepatan internet, uji latensi wifi" />
+    <meta name="author" content="Fathi Fadhil" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://wifi.fetyy.my.id/kecepatan.html" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wifi.fetyy.my.id/kecepatan.html" />
+    <meta property="og:title" content="Speed Wi-Fi — Uji Kecepatan Internet by Fathi Fadhil | Fetty Wi-Fi" />
+    <meta property="og:description" content="Speed Wi-Fi Test real-time — Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah secara akurat." />
+    <meta property="og:image" content="https://wifi.fetyy.my.id/logo/logo.webp" />
+
     <link rel="icon" type="image/webp" href="logo/logo.webp" />
     <link rel="apple-touch-icon" href="logo/logo.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -186,21 +199,30 @@
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid grid-cols-2 gap-4 w-full mb-8 relative z-10">
-                <div class="neu-card-sm rounded-3xl p-5 flex flex-col items-center">
+            <div class="grid grid-cols-3 gap-3 w-full mb-8 relative z-10">
+                <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
                     <span
                         class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Ping</span>
                     <div class="flex items-baseline gap-1" id="ping-result">
                         <span class="text-2xl font-bold text-primary" id="ping-value">--</span>
                         <span class="text-sm font-medium text-text-muted">ms</span>
                     </div>
+                    <span class="text-[9px] text-text-muted mt-0.5 opacity-70">ke server Cloudflare</span>
                 </div>
-                <div class="neu-card-sm rounded-3xl p-5 flex flex-col items-center">
+                <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
+                    <span
+                        class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Upload</span>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-bold text-primary" id="upload-value">--</span>
+                        <span class="text-sm font-medium text-text-muted">Mbps</span>
+                    </div>
+                </div>
+                <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
                     <span
                         class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Status</span>
                     <div class="flex items-center gap-2 mt-1">
                         <div class="w-3 h-3 rounded-full bg-gray-400" id="status-indicator"></div>
-                        <span class="font-bold text-text-primary" id="status-text">Siap</span>
+                        <span class="font-bold text-text-primary text-sm" id="status-text">Siap</span>
                     </div>
                 </div>
             </div>
@@ -388,6 +410,8 @@
             meter.style.strokeDashoffset = "330";
             needle.style.transform = "rotate(0deg)";
             valueDisplay.innerText = '0.00';
+            const uploadReset = document.getElementById('upload-value');
+            if (uploadReset) uploadReset.innerText = '--';
 
             needle.style.transition = 'none';
             meter.style.transition = 'none';
@@ -404,31 +428,35 @@
                 const pingSamples = [];
 
                 try {
-                    await fetch('https://speed.cloudflare.com/__down?bytes=0&nocache=' + Math.random(), { cache: 'no-store', mode: 'no-cors' });
+                    await fetch('https://speed.cloudflare.com/__down?bytes=0&nocache=' + Math.random(), { cache: 'no-store' });
                 } catch (e) {}
 
-                for (let i = 0; i < 8; i++) {
+                for (let i = 0; i < 20; i++) {
                     const pStart = performance.now();
                     try {
                         const url = 'https://speed.cloudflare.com/__down?bytes=0&nocache=' + Math.random();
-                        await fetch(url, { cache: 'no-store', mode: 'no-cors' });
+                        await fetch(url, { cache: 'no-store' });
                         const pEnd = performance.now();
 
                         let duration = pEnd - pStart;
                         const entries = performance.getEntriesByName(url);
                         if (entries && entries.length > 0) {
                             const entry = entries[entries.length - 1];
-                            if (entry.duration > 0) duration = entry.duration;
+                            if (entry.responseStart > 0 && entry.requestStart > 0) {
+                                duration = entry.responseStart - entry.requestStart;
+                            } else if (entry.duration > 0) {
+                                duration = entry.duration;
+                            }
                         }
 
                         const sampleTime = Math.round(duration);
                         if (sampleTime > 0) pingSamples.push(sampleTime);
                         pingDisplay.innerText = sampleTime;
                     } catch (e) {}
-                    await new Promise(r => setTimeout(r, 40));
+                    await new Promise(r => setTimeout(r, 100));
                 }
 
-                let accuratePing = 20;
+                let accuratePing = null;
                 let calculatedJitter = 1;
                 if (pingSamples.length > 0) {
                     if (pingSamples.length > 1) {
@@ -443,7 +471,8 @@
                     accuratePing = Math.round(validSamples.reduce((a, b) => a + b, 0) / validSamples.length);
                     pingDisplay.innerText = accuratePing;
                 } else {
-                    pingDisplay.innerText = '20';
+                    pingDisplay.innerText = '--';
+                    pingDisplay.title = 'Gagal mengukur ping';
                 }
 
                 targetMbps = 0.5;
@@ -453,8 +482,8 @@
                 statusText.innerText = 'Menguji Unduh...';
                 statusIndicator.className = 'w-3 h-3 rounded-full bg-primary shadow-[0_0_12px_rgba(79,70,229,0.6)] animate-pulse';
 
-                const testDuration = 9000;
-                const warmupDuration = 1500;
+                const testDuration = 10500;
+                const warmupDuration = 2500;
                 const startTime = performance.now();
                 const controller = new AbortController();
 
@@ -462,6 +491,7 @@
                 let measurementBytes = 0;
                 let measurementStartTime = 0;
                 const instantSamples = [];
+                let failedStreams = 0;
 
                 const downloadStream = async () => {
                     try {
@@ -507,7 +537,12 @@
                                 break;
                             }
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        if (e.name !== 'AbortError') {
+                            failedStreams++;
+                            console.warn('Download stream gagal:', e.message || e);
+                        }
+                    }
                 };
 
                 await Promise.all([
@@ -526,6 +561,75 @@
                     calculatedFinalMbps = (bytesToCalculate * 8 / finalDurationSec) / 1000000;
                 }
 
+                // Peringatan jika stream gagal
+                let downloadWarning = '';
+                if (failedStreams >= 2) {
+                    downloadWarning = `(${failedStreams}/4 koneksi gagal)`;
+                }
+
+                // 3. Fase Upload
+                statusText.innerText = 'Menguji Unggah...';
+                statusIndicator.className = 'w-3 h-3 rounded-full bg-primary shadow-[0_0_12px_rgba(79,70,229,0.6)] animate-pulse';
+
+                let calculatedUploadMbps = 0;
+                const uploadDisplay = document.getElementById('upload-value');
+                try {
+                    const uploadData = new Uint8Array(2 * 1024 * 1024); // 2MB per chunk
+                    const uploadDuration = 7000;
+                    const uploadWarmup = 1500;
+                    const uploadStart = performance.now();
+                    let uploadTotalBytes = 0;
+                    let uploadMeasureBytes = 0;
+                    let uploadMeasureStart = 0;
+
+                    const uploadStream = async () => {
+                        while (performance.now() - uploadStart < uploadDuration) {
+                            try {
+                                await fetch('https://speed.cloudflare.com/__up', {
+                                    method: 'POST',
+                                    body: uploadData,
+                                    cache: 'no-store'
+                                });
+                                const now = performance.now();
+                                const elapsed = now - uploadStart;
+                                uploadTotalBytes += uploadData.byteLength;
+
+                                if (elapsed >= uploadWarmup) {
+                                    if (uploadMeasureStart === 0) uploadMeasureStart = now;
+                                    uploadMeasureBytes += uploadData.byteLength;
+                                }
+
+                                // Update gauge selama upload
+                                if (elapsed >= uploadWarmup && uploadMeasureStart > 0) {
+                                    const uploadSec = (now - uploadMeasureStart) / 1000;
+                                    if (uploadSec > 0.1) {
+                                        const liveUpload = (uploadMeasureBytes * 8 / uploadSec) / 1000000;
+                                        targetMbps = liveUpload;
+                                    }
+                                }
+                            } catch (e) { break; }
+                        }
+                    };
+
+                    isTestingActive = true;
+                    await Promise.all([uploadStream(), uploadStream()]);
+
+                    const uploadEnd = performance.now();
+                    const uploadFinalSec = uploadMeasureStart > 0
+                        ? (uploadEnd - uploadMeasureStart) / 1000
+                        : (uploadDuration / 1000);
+                    const uploadFinalBytes = uploadMeasureBytes > 0 ? uploadMeasureBytes : uploadTotalBytes;
+
+                    if (uploadFinalBytes > 0 && uploadFinalSec > 0) {
+                        calculatedUploadMbps = (uploadFinalBytes * 8 / uploadFinalSec) / 1000000;
+                    }
+
+                    if (uploadDisplay) uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
+                } catch (uploadError) {
+                    console.warn('Upload test gagal:', uploadError);
+                    if (uploadDisplay) uploadDisplay.innerText = '--';
+                }
+
                 isTestingActive = false;
 
                 setTimeout(() => {
@@ -542,15 +646,17 @@
                         meter.style.strokeDashoffset = (330 - (330 * progress)).toFixed(2);
                         needle.style.transform = `rotate(${(progress * 270).toFixed(2)}deg)`;
 
-                        statusText.innerText = 'Selesai';
-                        statusIndicator.className = 'w-3 h-3 rounded-full bg-success shadow-[0_0_12px_rgba(16,185,129,0.6)]';
+                        statusText.innerText = downloadWarning ? 'Selesai ' + downloadWarning : 'Selesai';
+                        statusIndicator.className = downloadWarning
+                            ? 'w-3 h-3 rounded-full bg-warning shadow-[0_0_12px_rgba(234,179,8,0.6)]'
+                            : 'w-3 h-3 rounded-full bg-success shadow-[0_0_12px_rgba(16,185,129,0.6)]';
                         btn.disabled = false;
                         hasTestedOnce = true;
                         btn.innerHTML = '<span class="material-symbols-outlined">&#xe5d5;</span> Ulangi Tes';
 
                         // Save result to local history
-                        const finalPing = parseInt(pingDisplay.innerText) || accuratePing;
-                        saveSpeedResult(finalPing, currentDisplayMbps);
+                        const finalPing = parseInt(pingDisplay.innerText) || accuratePing || 0;
+                        saveSpeedResult(finalPing, currentDisplayMbps, calculatedUploadMbps);
                     }, 500);
                 }, 300);
             } catch (error) {
@@ -582,7 +688,7 @@
             localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
         }
 
-        function saveSpeedResult(ping, mbps) {
+        function saveSpeedResult(ping, mbps, uploadMbps) {
             const ispEl = document.querySelector('.isp-name-display');
             const cityEl = document.querySelector('.isp-city-display');
 
@@ -591,6 +697,7 @@
                 date: new Date().toISOString(),
                 ping: ping,
                 speed: parseFloat(mbps.toFixed(2)),
+                upload: uploadMbps ? parseFloat(uploadMbps.toFixed(2)) : 0,
                 isp: ispEl ? ispEl.innerText : '-',
                 city: cityEl ? cityEl.innerText : '-'
             };
@@ -707,11 +814,16 @@
                                     <span class="font-bold ${pingColor}">${entry.ping} ms</span>
                                 </div>
                                 <div class="flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe5d8;</span>
+                                    <span class="text-text-muted">Upload:</span>
+                                    <span class="font-medium text-text-primary">${entry.upload ? entry.upload + ' Mbps' : '-'}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
                                     <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe55e;</span>
                                     <span class="text-text-muted">Lokasi:</span>
                                     <span class="font-medium text-text-primary truncate">${entry.city}</span>
                                 </div>
-                                <div class="flex items-center gap-1.5 col-span-2 pt-0.5">
+                                <div class="flex items-center gap-1.5">
                                     <span class="material-symbols-outlined text-[14px] text-text-subtle shrink-0">&#xe894;</span>
                                     <span class="text-text-muted shrink-0">ISP:</span>
                                     <span class="font-semibold text-text-primary break-words leading-tight">${entry.isp}</span>

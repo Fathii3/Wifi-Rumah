@@ -1,4 +1,4 @@
-# Wi-Fi Rumah — Smart Guest Portal & Network Dashboard
+# Wi-Fi Rumah - Smart Guest Portal & Network Dashboard
 
 <p align="center">
   <img src="logo/logo.webp" alt="Wi-Fi Rumah Logo" width="100" height="100" />

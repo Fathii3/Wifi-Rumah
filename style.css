@@ -29,18 +29,18 @@
     --accent-danger: #ef4444;
     --accent-cyan: #06b6d4;
 
-    /* Neumorphic Shadows — Raised (Extruded) */
+    /* Neumorphic Shadows - Raised (Extruded) */
     --neu-raised: 6px 6px 14px var(--neu-dark), -6px -6px 14px var(--neu-light);
     --neu-raised-sm: 3px 3px 8px var(--neu-dark), -3px -3px 8px var(--neu-light);
     --neu-raised-lg: 10px 10px 20px var(--neu-dark), -10px -10px 20px var(--neu-light);
     --neu-raised-xl: 14px 14px 28px var(--neu-dark), -14px -14px 28px var(--neu-light);
 
-    /* Neumorphic Shadows — Inset (Recessed) */
+    /* Neumorphic Shadows - Inset (Recessed) */
     --neu-inset: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
     --neu-inset-sm: inset 2px 2px 5px var(--neu-dark), inset -2px -2px 5px var(--neu-light);
     --neu-inset-lg: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
 
-    /* Neumorphic Shadows — Button Interactive */
+    /* Neumorphic Shadows - Button Interactive */
     --neu-btn: 5px 5px 10px var(--neu-dark), -5px -5px 10px var(--neu-light);
     --neu-btn-hover: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
     --neu-btn-pressed: inset 3px 3px 7px var(--neu-dark), inset -3px -3px 7px var(--neu-light);
@@ -476,7 +476,7 @@ button:hover .material-symbols-outlined {
 }
 
 /* ==========================================================================
-   Neumorphic Background — subtle, no blobs
+   Neumorphic Background - subtle, no blobs
    ========================================================================== */
 .bg-glow {
     display: none;

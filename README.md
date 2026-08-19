@@ -22,22 +22,22 @@
 
 ---
 
-## 📑 Daftar Isi
-- [Ringkasan Proyek](#-ringkasan-proyek)
-- [Fitur Utama](#-fitur-utama)
-- [Struktur Direktori](#-struktur-direktori)
-- [Panduan Instalasi](#-panduan-instalasi)
-- [Konfigurasi Lingkungan](#-konfigurasi-lingkungan)
+## Daftar Isi
+- [Ringkasan Proyek](#ringkasan-proyek)
+- [Fitur Utama](#fitur-utama)
+- [Struktur Direktori](#struktur-direktori)
+- [Panduan Instalasi](#panduan-instalasi)
+- [Konfigurasi Lingkungan](#konfigurasi-lingkungan)
   - [1. Konfigurasi Lokal (.env & config.js)](#1-konfigurasi-lokal-env--configjs)
   - [2. Konfigurasi Cloud / Vercel (Environment Variables & Edge Config)](#2-konfigurasi-cloud--vercel-environment-variables--edge-config)
-- [Menghubungkan Backend Lokal ke Cloud (HTTP to HTTPS via Ngrok)](#-menghubungkan-backend-lokal-ke-cloud-http-to-https-via-ngrok)
-- [Menjalankan Aplikasi](#-menjalankan-aplikasi)
-- [Akses Panel Admin Router](#-akses-panel-admin-router)
-- [Kontributor & Lisensi](#-kontributor--lisensi)
+- [Menghubungkan Backend Lokal ke Cloud (HTTP to HTTPS via Ngrok)](#menghubungkan-backend-lokal-ke-cloud-http-to-https-via-ngrok)
+- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [Akses Panel Admin Router](#akses-panel-admin-router)
+- [Kontributor & Lisensi](#kontributor--lisensi)
 
 ---
 
-## 📌 Ringkasan Proyek
+## Ringkasan Proyek
 
 **Wi-Fi Rumah** adalah aplikasi web utilitas jaringan modern yang dirancang untuk mempermudah tamu rumah terhubung ke jaringan Wi-Fi secara instan melalui pemindaian QR Code dinamis tanpa perlu mengetik kata sandi secara manual, sekaligus memberikan kontrol penuh bagi pemilik rumah untuk memantau performa kecepatan internet dan daftar perangkat aktif secara *real-time*.
 
@@ -45,7 +45,7 @@ Dibangun dengan pendekatan estetika **Neumorphism (Soft UI)** yang bersih, takti
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### 1. Beranda & Portal Tamu Instan (`index.html`)
 * **Pemindaian QR Code Otomatis:** Tamu cukup mengarahkan kamera ponsel ke QR Code dinamis untuk langsung terhubung ke Wi-Fi.
@@ -66,7 +66,7 @@ Dibangun dengan pendekatan estetika **Neumorphism (Soft UI)** yang bersih, takti
 
 ---
 
-## 📁 Struktur Direktori
+## Struktur Direktori
 
 ```text
 Wifi-Rumah/
@@ -88,7 +88,7 @@ Wifi-Rumah/
 
 ---
 
-## 🚀 Panduan Instalasi
+## Panduan Instalasi
 
 ### 1. Prasyarat
 * [Node.js](https://nodejs.org/) (versi 18 ke atas)
@@ -104,7 +104,7 @@ npm install
 
 ---
 
-## ⚙️ Konfigurasi Lingkungan
+## Konfigurasi Lingkungan
 
 Aplikasi ini mendukung dua metode konfigurasi: **Lokal (`.env`)** dan **Cloud (Vercel Environment Variables / Edge Config)**.
 
@@ -141,7 +141,7 @@ const wifiConfig = {
 
 Jika Anda meng-hosting website di **Vercel**, data sensitif seperti password Wi-Fi dan URL backend scraper tidak boleh diletakkan sembarangan di file frontend. Vercel Serverless Function (`/api/wifi-config` dan `/api/devices`) akan membaca data ini secara aman dari server-side.
 
-#### Opsi A: Menggunakan Vercel Edge Config (Rekomendasi ⭐)
+#### Opsi A: Menggunakan Vercel Edge Config (Rekomendasi)
 Vercel Edge Config memungkinkan Anda memperbarui nama Wi-Fi, password, atau URL Ngrok secara instan tanpa perlu melakukan build/deploy ulang:
 
 1. Buat **Edge Config Store** baru di dashboard Vercel (misalnya bernama `wifi-rumah-edge-config`).
@@ -168,7 +168,7 @@ Buka **Project Settings > Environment Variables** di Vercel, lalu tambahkan vari
 
 ---
 
-## 🌐 Menghubungkan Backend Lokal ke Cloud (HTTP to HTTPS via Ngrok)
+## Menghubungkan Backend Lokal ke Cloud (HTTP to HTTPS via Ngrok)
 
 ### Mengapa Membutuhkan Tunneling (Ngrok)?
 1. **Perbedaan Protokol (Mixed Content):** Website yang di-host di Vercel berjalan pada protokol aman **HTTPS** (`https://wifi.fetyy.my.id`). Jika frontend mencoba memanggil server lokal Anda langsung lewat **HTTP** (`http://localhost:3000`), browser akan otomatis memblokir koneksi tersebut (*Mixed Content Block*).
@@ -190,12 +190,12 @@ Buka **Project Settings > Environment Variables** di Vercel, lalu tambahkan vari
    ```
 4. **Pasang URL Ngrok tersebut:**
    * Di **Vercel Edge Config / Environment Variables** pada key `API_HOST`, **atau**
-   * Klik tombol **Pengaturan (ikon gear ⚙️)** di halaman `perangkat.html` pada website Anda lalu simpan URL tersebut.
+   * Klik tombol **Pengaturan (ikon gear)** di halaman `perangkat.html` pada website Anda lalu simpan URL tersebut.
 5. Halaman monitoring perangkat di Vercel kini dapat membaca data router lokal secara aman tanpa kendala *Mixed Content*.
 
 ---
 
-## 🎮 Menjalankan Aplikasi
+## Menjalankan Aplikasi
 
 ### Mode Standalone (Speedtest & Portal Tamu saja)
 Cukup buka file `index.html` atau `kecepatan.html` langsung di browser Anda.
@@ -211,7 +211,7 @@ http://localhost:3000
 
 ---
 
-## 🔒 Akses Panel Admin Router
+## Akses Panel Admin Router
 
 Gunakan informasi di bawah ini jika Anda perlu masuk langsung ke pengaturan router utama:
 
@@ -231,9 +231,9 @@ Gunakan informasi di bawah ini jika Anda perlu masuk langsung ke pengaturan rout
 
 ---
 
-## 👥 Kontributor & Lisensi
+## Kontributor & Lisensi
 
-Dibuat dengan ❤️ untuk **Keluarga Pak Harun**.  
+Dibuat dengan rasa bangga untuk **Keluarga Pak Harun**.  
 Lisensi: [ISC License](package.json)
 
 

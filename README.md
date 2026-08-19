@@ -223,7 +223,7 @@ Gunakan informasi di bawah ini jika Anda perlu masuk langsung ke pengaturan rout
 | **Tipe Perangkat** | **ONU / ONT HSGQ** (Fiber Optic GPON/EPON) |
 | **Link Portal Web** | `http://192.168.1.1/admin/login.asp` |
 | **Username Default** | `admin` |
-| **Password Default** | `Rumah` |
+| **Password Default** | `admin` |
 
 > [!NOTE]
 > **Catatan Perangkat (Hardware Note):**  

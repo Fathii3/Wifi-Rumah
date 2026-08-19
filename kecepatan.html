@@ -396,6 +396,84 @@
             }
         }
 
+        // Animasi angka melayang dari gauge ke posisi metric card
+        function animateFloatResult(value, unit, targetEl) {
+            if (!targetEl) return;
+            const gaugeCenter = document.getElementById('speed-value');
+            if (!gaugeCenter) return;
+
+            const floater = document.createElement('span');
+            floater.className = 'speed-float-result';
+            floater.innerText = value + ' ' + unit;
+
+            // Posisi awal: dari tengah gauge
+            const gaugeRect = gaugeCenter.getBoundingClientRect();
+            const targetRect = targetEl.getBoundingClientRect();
+
+            floater.style.cssText = `
+                position: fixed;
+                left: ${gaugeRect.left + gaugeRect.width / 2}px;
+                top: ${gaugeRect.top + gaugeRect.height / 2}px;
+                transform: translate(-50%, -50%) scale(1.3);
+                font-size: 20px;
+                font-weight: 800;
+                color: #4f46e5;
+                pointer-events: none;
+                z-index: 9999;
+                opacity: 1;
+                transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+                text-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+                white-space: nowrap;
+            `;
+            document.body.appendChild(floater);
+
+            // Force reflow sebelum animasi
+            floater.offsetHeight;
+
+            // Animasi ke posisi target
+            requestAnimationFrame(() => {
+                floater.style.left = `${targetRect.left + targetRect.width / 2}px`;
+                floater.style.top = `${targetRect.top + targetRect.height / 2}px`;
+                floater.style.transform = 'translate(-50%, -50%) scale(1)';
+                floater.style.fontSize = '14px';
+                floater.style.opacity = '0';
+            });
+
+            // Cleanup setelah animasi selesai
+            setTimeout(() => {
+                if (floater.parentNode) floater.parentNode.removeChild(floater);
+            }, 750);
+        }
+
+        // Reset gauge dengan animasi halus ke 0
+        function resetGaugeSmooth() {
+            return new Promise(resolve => {
+                const meter = document.getElementById('speed-meter');
+                const needle = document.getElementById('speed-needle');
+                const valueDisplay = document.getElementById('speed-value');
+
+                targetMbps = 0;
+                const fadeDown = () => {
+                    currentDisplayMbps *= 0.85;
+                    if (currentDisplayMbps < 0.05) {
+                        currentDisplayMbps = 0;
+                        targetMbps = 0;
+                        if (valueDisplay) valueDisplay.innerText = '0.00';
+                        if (meter) meter.style.strokeDashoffset = '330';
+                        if (needle) needle.style.transform = 'rotate(0deg)';
+                        resolve();
+                        return;
+                    }
+                    if (valueDisplay) valueDisplay.innerText = currentDisplayMbps.toFixed(2);
+                    let progress = speedToProgress(currentDisplayMbps);
+                    if (meter) meter.style.strokeDashoffset = (330 - (330 * progress)).toFixed(2);
+                    if (needle) needle.style.transform = `rotate(${(progress * 270).toFixed(2)}deg)`;
+                    requestAnimationFrame(fadeDown);
+                };
+                fadeDown();
+            });
+        }
+
         async function runRobustSpeedTest() {
             const btn = document.getElementById('start-speed-btn');
             const pingDisplay = document.getElementById('ping-value');
@@ -404,6 +482,7 @@
             const needle = document.getElementById('speed-needle');
             const downloadDisplay = document.getElementById('download-value');
             const uploadDisplay = document.getElementById('upload-value');
+            const unitDisplay = document.getElementById('speed-unit');
 
             if (btn.disabled) return;
 
@@ -420,6 +499,7 @@
             meter.style.strokeDashoffset = "330";
             needle.style.transform = "rotate(0deg)";
             valueDisplay.innerText = '0.00';
+            if (unitDisplay) unitDisplay.innerText = 'MBPS';
 
             needle.style.transition = 'none';
             meter.style.transition = 'none';
@@ -431,7 +511,9 @@
             animFrameId = requestAnimationFrame(updateGaugeSmoothly);
 
             try {
-                // 1. Fase Ping
+                // =============================================
+                // FASE 1: PING
+                // =============================================
                 targetMbps = 3.5;
                 const pingSamples = [];
 
@@ -483,11 +565,17 @@
                     pingDisplay.title = 'Gagal mengukur ping';
                 }
 
+                // Bersihkan resource timing entries agar tidak memory leak
+                performance.clearResourceTimings();
+
                 targetMbps = 0.5;
                 await new Promise(r => setTimeout(r, 250));
 
-                // 2. Fase Unduh
+                // =============================================
+                // FASE 2: UNDUH (DOWNLOAD)
+                // =============================================
                 btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Unduh...';
+                if (unitDisplay) unitDisplay.innerHTML = '<span class="text-[9px] block opacity-60">UNDUH</span>MBPS';
 
                 const testDuration = 10500;
                 const warmupDuration = 2500;
@@ -497,6 +585,7 @@
                 let totalBytesDownloaded = 0;
                 let measurementBytes = 0;
                 let measurementStartTime = 0;
+                let lastMeasurementTime = 0; // Track waktu chunk terakhir yang masuk measurement
                 const instantSamples = [];
                 let failedStreams = 0;
 
@@ -521,6 +610,7 @@
                             if (elapsedFromStart >= warmupDuration) {
                                 if (measurementStartTime === 0) measurementStartTime = now;
                                 measurementBytes += value.length;
+                                lastMeasurementTime = now; // Catat waktu chunk measurement terakhir
                             }
 
                             instantSamples.push({ time: now, bytes: totalBytesDownloaded });
@@ -559,7 +649,9 @@
                     downloadStream()
                 ]);
 
-                const measurementEndTime = performance.now();
+                // Gunakan lastMeasurementTime (waktu chunk terakhir), bukan waktu setelah Promise.all
+                // Ini lebih akurat karena Promise.all bisa selesai jauh setelah data terakhir diterima
+                const measurementEndTime = lastMeasurementTime > 0 ? lastMeasurementTime : performance.now();
                 const finalDurationSec = measurementStartTime > 0 ? (measurementEndTime - measurementStartTime) / 1000 : (testDuration / 1000);
                 const bytesToCalculate = measurementBytes > 0 ? measurementBytes : totalBytesDownloaded;
 
@@ -568,57 +660,124 @@
                     calculatedFinalMbps = (bytesToCalculate * 8 / finalDurationSec) / 1000000;
                 }
 
+                // Simpan hasil download ke card "Unduh" dan animasikan
                 if (downloadDisplay && calculatedFinalMbps > 0) {
                     downloadDisplay.innerText = calculatedFinalMbps.toFixed(2);
+                    animateFloatResult(calculatedFinalMbps.toFixed(2), 'Mbps', downloadDisplay);
                 }
 
-                // 3. Fase Upload
+                // Hentikan animasi gauge loop sementara
+                isTestingActive = false;
+                if (animFrameId) {
+                    cancelAnimationFrame(animFrameId);
+                    animFrameId = null;
+                }
+
+                // Tahan gauge di posisi download sebentar supaya user lihat hasilnya
+                currentDisplayMbps = calculatedFinalMbps;
+                targetMbps = calculatedFinalMbps;
+                valueDisplay.innerText = calculatedFinalMbps.toFixed(2);
+                let dlProgress = speedToProgress(calculatedFinalMbps);
+                meter.style.strokeDashoffset = (330 - (330 * dlProgress)).toFixed(2);
+                needle.style.transform = `rotate(${(dlProgress * 270).toFixed(2)}deg)`;
+
+                await new Promise(r => setTimeout(r, 800));
+
+                // =============================================
+                // TRANSISI: Reset gauge untuk upload
+                // =============================================
+                await resetGaugeSmooth();
+                await new Promise(r => setTimeout(r, 300));
+
+                // =============================================
+                // FASE 3: UPLOAD
+                // =============================================
                 btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Upload...';
+                if (unitDisplay) unitDisplay.innerHTML = '<span class="text-[9px] block opacity-60">UPLOAD</span>MBPS';
+
+                isTestingActive = true;
+                targetMbps = 2; // Mulai gauge bergerak sedikit selagi warmup upload
+                animFrameId = requestAnimationFrame(updateGaugeSmoothly);
 
                 let calculatedUploadMbps = 0;
                 try {
-                    const uploadData = new Uint8Array(2 * 1024 * 1024); // 2MB per chunk
-                    const uploadDuration = 7000;
-                    const uploadWarmup = 1500;
+                    // Upload: ukuran chunk adaptif, mulai kecil lalu naik
+                    // Chunk kecil di awal supaya gauge langsung bergerak (tidak stuck nunggu 4MB)
+                    const smallChunk = new Uint8Array(512 * 1024);   // 512KB awal
+                    const largeChunk = new Uint8Array(2 * 1024 * 1024); // 2MB setelah warmup
+                    const uploadDuration = 8000;
+                    const uploadWarmup = 2000;
                     const uploadStart = performance.now();
+                    const uploadController = new AbortController();
                     let uploadTotalBytes = 0;
                     let uploadMeasureBytes = 0;
                     let uploadMeasureStart = 0;
+                    let lastUploadMeasureTime = 0; // Track waktu chunk terakhir yang masuk measurement
+                    const uploadInstantSamples = [];
 
                     const uploadStream = async () => {
                         while (performance.now() - uploadStart < uploadDuration) {
                             try {
+                                const elapsed = performance.now() - uploadStart;
+                                // Pakai chunk kecil di warmup supaya gauge responsive
+                                const chunk = elapsed < uploadWarmup ? smallChunk : largeChunk;
+
+                                const chunkStart = performance.now();
                                 await fetch('https://speed.cloudflare.com/__up', {
                                     method: 'POST',
-                                    body: uploadData,
-                                    cache: 'no-store'
+                                    body: chunk,
+                                    cache: 'no-store',
+                                    signal: uploadController.signal
                                 });
-                                const now = performance.now();
-                                const elapsed = now - uploadStart;
-                                uploadTotalBytes += uploadData.byteLength;
+                                const chunkEnd = performance.now();
+                                const chunkElapsed = chunkEnd - uploadStart;
+                                uploadTotalBytes += chunk.byteLength;
 
-                                if (elapsed >= uploadWarmup) {
-                                    if (uploadMeasureStart === 0) uploadMeasureStart = now;
-                                    uploadMeasureBytes += uploadData.byteLength;
+                                if (chunkElapsed >= uploadWarmup) {
+                                    if (uploadMeasureStart === 0) uploadMeasureStart = chunkStart;
+                                    uploadMeasureBytes += chunk.byteLength;
+                                    lastUploadMeasureTime = chunkEnd; // Catat waktu chunk measurement terakhir
                                 }
 
-                                // Update gauge selama upload
-                                if (elapsed >= uploadWarmup && uploadMeasureStart > 0) {
-                                    const uploadSec = (now - uploadMeasureStart) / 1000;
-                                    if (uploadSec > 0.1) {
-                                        const liveUpload = (uploadMeasureBytes * 8 / uploadSec) / 1000000;
+                                // Tracking instant samples per chunk untuk gauge realtime
+                                uploadInstantSamples.push({ time: chunkEnd, bytes: uploadTotalBytes });
+                                while (uploadInstantSamples.length > 0 && (chunkEnd - uploadInstantSamples[0].time) > 800) {
+                                    uploadInstantSamples.shift();
+                                }
+
+                                // Update gauge SELALU setelah setiap chunk (tidak hanya setelah warmup)
+                                if (uploadInstantSamples.length > 1) {
+                                    const oldest = uploadInstantSamples[0];
+                                    const windowSec = (chunkEnd - oldest.time) / 1000;
+                                    const windowBytes = uploadTotalBytes - oldest.bytes;
+                                    if (windowSec > 0.1) {
+                                        const liveUpload = (windowBytes * 8 / windowSec) / 1000000;
                                         targetMbps = liveUpload;
-                                        if (uploadDisplay) uploadDisplay.innerText = liveUpload.toFixed(2);
+                                    }
+                                } else if (uploadTotalBytes > 0) {
+                                    // Bahkan chunk pertama pun langsung update gauge
+                                    const totalSec = (chunkEnd - uploadStart) / 1000;
+                                    if (totalSec > 0.05) {
+                                        targetMbps = (uploadTotalBytes * 8 / totalSec) / 1000000;
                                     }
                                 }
-                            } catch (e) { break; }
+                            } catch (e) {
+                                if (e.name === 'AbortError') break;
+                                break;
+                            }
                         }
                     };
 
-                    isTestingActive = true;
-                    await Promise.all([uploadStream(), uploadStream()]);
+                    // Timeout otomatis untuk upload: abort semua stream saat durasi tercapai
+                    const uploadTimeout = setTimeout(() => uploadController.abort(), uploadDuration + 500);
 
-                    const uploadEnd = performance.now();
+                    // 3 parallel upload streams untuk akurasi lebih baik
+                    await Promise.all([uploadStream(), uploadStream(), uploadStream()]);
+                    clearTimeout(uploadTimeout);
+                    if (!uploadController.signal.aborted) uploadController.abort();
+
+                    // Gunakan lastUploadMeasureTime (waktu chunk terakhir), bukan waktu setelah Promise.all
+                    const uploadEnd = lastUploadMeasureTime > 0 ? lastUploadMeasureTime : performance.now();
                     const uploadFinalSec = uploadMeasureStart > 0
                         ? (uploadEnd - uploadMeasureStart) / 1000
                         : (uploadDuration / 1000);
@@ -628,29 +787,44 @@
                         calculatedUploadMbps = (uploadFinalBytes * 8 / uploadFinalSec) / 1000000;
                     }
 
-                    if (uploadDisplay) uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
+                    // Simpan hasil upload ke card "Upload" dan animasikan
+                    if (uploadDisplay) {
+                        uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
+                        animateFloatResult(calculatedUploadMbps.toFixed(2), 'Mbps', uploadDisplay);
+                    }
                 } catch (uploadError) {
                     console.warn('Upload test gagal:', uploadError);
                     if (uploadDisplay) uploadDisplay.innerText = '--';
                 }
 
+                // =============================================
+                // FASE AKHIR: Selesai
+                // =============================================
                 isTestingActive = false;
+                if (unitDisplay) unitDisplay.innerText = 'MBPS';
 
+                // Tahan gauge di posisi upload sebentar
                 setTimeout(() => {
-                    targetMbps = calculatedFinalMbps > 0 ? calculatedFinalMbps : currentDisplayMbps;
+                    targetMbps = calculatedUploadMbps > 0 ? calculatedUploadMbps : currentDisplayMbps;
 
                     setTimeout(() => {
                         if (animFrameId) {
                             cancelAnimationFrame(animFrameId);
                             animFrameId = null;
                         }
-                        currentDisplayMbps = targetMbps;
+
+                        // Gauge menunjukkan kecepatan download sebagai "final display" (seperti Ookla)
+                        currentDisplayMbps = calculatedFinalMbps > 0 ? calculatedFinalMbps : 0;
+                        targetMbps = currentDisplayMbps;
                         valueDisplay.innerText = currentDisplayMbps.toFixed(2);
-                        if (downloadDisplay) downloadDisplay.innerText = currentDisplayMbps.toFixed(2);
-                        if (uploadDisplay && calculatedUploadMbps > 0) uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
+
                         let progress = speedToProgress(currentDisplayMbps);
                         meter.style.strokeDashoffset = (330 - (330 * progress)).toFixed(2);
                         needle.style.transform = `rotate(${(progress * 270).toFixed(2)}deg)`;
+
+                        // Pastikan angka di card TIDAK di-override
+                        if (downloadDisplay) downloadDisplay.innerText = calculatedFinalMbps.toFixed(2);
+                        if (uploadDisplay && calculatedUploadMbps > 0) uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
 
                         btn.disabled = false;
                         hasTestedOnce = true;
@@ -658,12 +832,13 @@
 
                         // Save result to local history
                         const finalPing = parseInt(pingDisplay.innerText) || accuratePing || 0;
-                        saveSpeedResult(finalPing, currentDisplayMbps, calculatedUploadMbps);
+                        saveSpeedResult(finalPing, calculatedFinalMbps, calculatedUploadMbps);
                     }, 500);
-                }, 300);
+                }, 600);
             } catch (error) {
                 console.error("Gagal melakukan tes jaringan", error);
                 isTestingActive = false;
+                if (unitDisplay) unitDisplay.innerText = 'MBPS';
                 btn.disabled = false;
                 if (hasTestedOnce) {
                     btn.innerHTML = '<span class="material-symbols-outlined">&#xe5d5;</span> Ulangi Tes';

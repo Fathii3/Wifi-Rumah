@@ -3,6 +3,8 @@ node_modules/
 ngrok_token.txt
 ngrok_domain.txt
 *.png
+!logo/*.png
+!favicon.png
 scratch_debug.js
 Connecting HTTP Backend to HTTPS-wipi.md
 menghubungkan http ke https.md

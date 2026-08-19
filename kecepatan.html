@@ -4,22 +4,32 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Speed Wi-Fi - Uji Kecepatan Internet by Fathi Fadhil | Fetty Wi-Fi</title>
+    <title>Speed Wi-Fi - Uji Kecepatan Internet | WIFI-Rumah</title>
+    <meta name="application-name" content="WIFI-Rumah" />
+    <meta name="apple-mobile-web-app-title" content="WIFI-Rumah" />
     <meta name="description" content="Speed Wi-Fi Test real-time by Fathi Fadhil (Fetty Wi-Fi) - Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah dengan akurat." />
-    <meta name="keywords" content="speed wifi, fetty wifi, wifi rumah, fathi fadhil, speedtest wifi rumah, cek speed wifi, tes kecepatan internet, uji latensi wifi" />
+    <meta name="keywords" content="speed wifi, fetty wifi, wifi rumah, WIFI-Rumah, fathi fadhil, WIFI-Rumah by Fathi Fadhil, speedtest wifi rumah, cek speed wifi, tes kecepatan internet, uji latensi wifi" />
     <meta name="author" content="Fathi Fadhil" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://wifi.fetyy.my.id/kecepatan.html" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="WIFI-Rumah" />
     <meta property="og:url" content="https://wifi.fetyy.my.id/kecepatan.html" />
-    <meta property="og:title" content="Speed Wi-Fi - Uji Kecepatan Internet by Fathi Fadhil | Fetty Wi-Fi" />
-    <meta property="og:description" content="Speed Wi-Fi Test real-time - Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah secara akurat." />
-    <meta property="og:image" content="https://wifi.fetyy.my.id/logo/logo.webp" />
+    <meta property="og:title" content="Speed Wi-Fi - Uji Kecepatan Internet | WIFI-Rumah" />
+    <meta property="og:description" content="Speed Wi-Fi Test real-time by Fathi Fadhil (Fetty Wi-Fi) - Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah secara akurat." />
+    <meta property="og:image" content="https://wifi.fetyy.my.id/logo/logo.png" />
+    <meta property="og:image:alt" content="Logo WIFI-Rumah" />
 
-    <link rel="icon" type="image/webp" href="logo/logo.webp" />
-    <link rel="apple-touch-icon" href="logo/logo.webp" />
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/logo/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/logo/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -219,10 +229,10 @@
                 </div>
                 <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
                     <span
-                        class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Status</span>
-                    <div class="flex items-center gap-2 mt-1">
-                        <div class="w-3 h-3 rounded-full bg-gray-400" id="status-indicator"></div>
-                        <span class="font-bold text-text-primary text-sm" id="status-text">Siap</span>
+                        class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Unduh</span>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-bold text-primary" id="download-value">--</span>
+                        <span class="text-sm font-medium text-text-muted">Mbps</span>
                     </div>
                 </div>
             </div>
@@ -392,17 +402,17 @@
             const valueDisplay = document.getElementById('speed-value');
             const meter = document.getElementById('speed-meter');
             const needle = document.getElementById('speed-needle');
-            const statusIndicator = document.getElementById('status-indicator');
-            const statusText = document.getElementById('status-text');
+            const downloadDisplay = document.getElementById('download-value');
+            const uploadDisplay = document.getElementById('upload-value');
 
             if (btn.disabled) return;
 
             // Reset UI
             btn.disabled = true;
-            btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji...';
+            btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Ping...';
             pingDisplay.innerText = '--';
-            statusIndicator.className = 'w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)] animate-pulse';
-            statusText.innerText = 'Menguji Ping...';
+            if (downloadDisplay) downloadDisplay.innerText = '--';
+            if (uploadDisplay) uploadDisplay.innerText = '--';
 
             targetMbps = 0;
             currentDisplayMbps = 0;
@@ -410,8 +420,6 @@
             meter.style.strokeDashoffset = "330";
             needle.style.transform = "rotate(0deg)";
             valueDisplay.innerText = '0.00';
-            const uploadReset = document.getElementById('upload-value');
-            if (uploadReset) uploadReset.innerText = '--';
 
             needle.style.transition = 'none';
             meter.style.transition = 'none';
@@ -479,8 +487,7 @@
                 await new Promise(r => setTimeout(r, 250));
 
                 // 2. Fase Unduh
-                statusText.innerText = 'Menguji Unduh...';
-                statusIndicator.className = 'w-3 h-3 rounded-full bg-primary shadow-[0_0_12px_rgba(79,70,229,0.6)] animate-pulse';
+                btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Unduh...';
 
                 const testDuration = 10500;
                 const warmupDuration = 2500;
@@ -561,18 +568,14 @@
                     calculatedFinalMbps = (bytesToCalculate * 8 / finalDurationSec) / 1000000;
                 }
 
-                // Peringatan jika stream gagal
-                let downloadWarning = '';
-                if (failedStreams >= 2) {
-                    downloadWarning = `(${failedStreams}/4 koneksi gagal)`;
+                if (downloadDisplay && calculatedFinalMbps > 0) {
+                    downloadDisplay.innerText = calculatedFinalMbps.toFixed(2);
                 }
 
                 // 3. Fase Upload
-                statusText.innerText = 'Menguji Unggah...';
-                statusIndicator.className = 'w-3 h-3 rounded-full bg-primary shadow-[0_0_12px_rgba(79,70,229,0.6)] animate-pulse';
+                btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Upload...';
 
                 let calculatedUploadMbps = 0;
-                const uploadDisplay = document.getElementById('upload-value');
                 try {
                     const uploadData = new Uint8Array(2 * 1024 * 1024); // 2MB per chunk
                     const uploadDuration = 7000;
@@ -605,6 +608,7 @@
                                     if (uploadSec > 0.1) {
                                         const liveUpload = (uploadMeasureBytes * 8 / uploadSec) / 1000000;
                                         targetMbps = liveUpload;
+                                        if (uploadDisplay) uploadDisplay.innerText = liveUpload.toFixed(2);
                                     }
                                 }
                             } catch (e) { break; }
@@ -642,14 +646,12 @@
                         }
                         currentDisplayMbps = targetMbps;
                         valueDisplay.innerText = currentDisplayMbps.toFixed(2);
+                        if (downloadDisplay) downloadDisplay.innerText = currentDisplayMbps.toFixed(2);
+                        if (uploadDisplay && calculatedUploadMbps > 0) uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
                         let progress = speedToProgress(currentDisplayMbps);
                         meter.style.strokeDashoffset = (330 - (330 * progress)).toFixed(2);
                         needle.style.transform = `rotate(${(progress * 270).toFixed(2)}deg)`;
 
-                        statusText.innerText = downloadWarning ? 'Selesai ' + downloadWarning : 'Selesai';
-                        statusIndicator.className = downloadWarning
-                            ? 'w-3 h-3 rounded-full bg-warning shadow-[0_0_12px_rgba(234,179,8,0.6)]'
-                            : 'w-3 h-3 rounded-full bg-success shadow-[0_0_12px_rgba(16,185,129,0.6)]';
                         btn.disabled = false;
                         hasTestedOnce = true;
                         btn.innerHTML = '<span class="material-symbols-outlined">&#xe5d5;</span> Ulangi Tes';
@@ -661,7 +663,6 @@
                 }, 300);
             } catch (error) {
                 console.error("Gagal melakukan tes jaringan", error);
-                statusText.innerText = 'Gagal';
                 isTestingActive = false;
                 btn.disabled = false;
                 if (hasTestedOnce) {
@@ -799,39 +800,73 @@
                 const pingColor = getPingColor(entry.ping);
 
                 const row = document.createElement('div');
-                row.className = 'neu-card-sm p-4 relative';
+                row.className = 'neu-card-sm p-4 relative rounded-2xl w-full';
                 row.innerHTML = `
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-2.5">
-                                <span class="text-lg font-bold text-text-primary">${entry.speed} <span class="text-xs font-semibold text-text-muted">Mbps</span></span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${label.color}" style="background: rgba(0,0,0,0.04);">${label.text}</span>
+                            <!-- Top: Unduh Speed & Badge -->
+                            <div class="flex items-center flex-wrap gap-2 mb-3">
+                                <span class="text-xl font-extrabold text-text-primary tracking-tight">
+                                    ${entry.speed} <span class="text-xs font-semibold text-text-muted">Mbps</span>
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${label.color}" style="background: rgba(0,0,0,0.04);">
+                                    ${label.text}
+                                </span>
                             </div>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe55f;</span>
-                                    <span class="text-text-muted">Ping:</span>
-                                    <span class="font-bold ${pingColor}">${entry.ping} ms</span>
+
+                            <!-- Metrics Grid: Unduh, Upload, Ping, Lokasi, and ISP -->
+                            <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                                <!-- Unduh (Download) -->
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="material-symbols-outlined text-[15px] text-primary shrink-0">&#xe5db;</span>
+                                    <span class="text-text-muted shrink-0">Unduh:</span>
+                                    <span class="font-bold text-primary break-all">${entry.speed ? entry.speed + ' Mbps' : '-'}</span>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe5d8;</span>
-                                    <span class="text-text-muted">Upload:</span>
-                                    <span class="font-medium text-text-primary">${entry.upload ? entry.upload + ' Mbps' : '-'}</span>
+
+                                <!-- Upload -->
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="material-symbols-outlined text-[15px] text-secondary shrink-0">&#xe5d8;</span>
+                                    <span class="text-text-muted shrink-0">Upload:</span>
+                                    <span class="font-bold text-secondary break-all">${entry.upload ? entry.upload + ' Mbps' : '-'}</span>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-text-subtle">&#xe55e;</span>
-                                    <span class="text-text-muted">Lokasi:</span>
-                                    <span class="font-medium text-text-primary truncate">${entry.city}</span>
+
+                                <!-- Ping -->
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="material-symbols-outlined text-[15px] ${pingColor} shrink-0">&#xe55f;</span>
+                                    <span class="text-text-muted shrink-0">Ping:</span>
+                                    <span class="font-bold ${pingColor} break-all">${entry.ping} ms</span>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-text-subtle shrink-0">&#xe894;</span>
-                                    <span class="text-text-muted shrink-0">ISP:</span>
-                                    <span class="font-semibold text-text-primary break-words leading-tight">${entry.isp}</span>
+
+                                <!-- Lokasi -->
+                                <div class="flex items-start gap-1.5 min-w-0">
+                                    <span class="material-symbols-outlined text-[15px] text-cyan-accent shrink-0 mt-0.5">&#xe55e;</span>
+                                    <div class="flex flex-wrap items-baseline gap-1 break-words min-w-0">
+                                        <span class="text-text-muted shrink-0">Lokasi:</span>
+                                        <span class="font-medium text-text-primary break-words">${entry.city || '-'}</span>
+                                    </div>
+                                </div>
+
+                                <!-- ISP (Full width on span-2 for maximum readability) -->
+                                <div class="flex items-start gap-1.5 min-w-0 col-span-2 pt-0.5">
+                                    <span class="material-symbols-outlined text-[15px] text-primary/80 shrink-0 mt-0.5">&#xe894;</span>
+                                    <div class="flex flex-wrap items-baseline gap-1 break-words min-w-0">
+                                        <span class="text-text-muted shrink-0">ISP:</span>
+                                        <span class="font-semibold text-text-primary break-words leading-tight">${entry.isp || '-'}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mt-2 text-[10px] text-text-subtle">${formatDate(entry.date)}</div>
+
+                            <!-- Date Footer with subtle time icon -->
+                            <div class="mt-3 pt-2 border-t border-neu-dark/15 text-[10px] text-text-subtle flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px] text-text-subtle shrink-0">&#xe8b5;</span>
+                                <span>${formatDate(entry.date)}</span>
+                            </div>
                         </div>
-                        <button onclick="deleteHistoryItem(${entry.id})" class="text-text-subtle hover:text-error transition-colors p-1 shrink-0" title="Hapus">
+
+                        <!-- Delete Button -->
+                        <button onclick="deleteHistoryItem(${entry.id})" 
+                                class="text-text-subtle hover:text-error transition-colors p-1.5 -mr-1 -mt-1 rounded-lg hover:bg-error/10 shrink-0" 
+                                title="Hapus riwayat">
                             <span class="material-symbols-outlined text-[18px]">&#xe872;</span>
                         </button>
                     </div>

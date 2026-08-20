@@ -1,7 +1,7 @@
 {
   "name": "WIFI-Rumah",
   "short_name": "WIFI-Rumah",
-  "description": "Portal Tamu Wi-Fi Rumah & Speed Test by Fathi Fadhil",
+  "description": "Portal tamu Wi-Fi interaktif & speed test - Projek independen by Fathi Fadhil",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#e0e5ec",

@@ -7,7 +7,7 @@
     <title>Speed Wi-Fi - Uji Kecepatan Internet | WIFI-Rumah</title>
     <meta name="application-name" content="WIFI-Rumah" />
     <meta name="apple-mobile-web-app-title" content="WIFI-Rumah" />
-    <meta name="description" content="Speed Wi-Fi Test real-time by Fathi Fadhil (Fetty Wi-Fi) - Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah dengan akurat." />
+    <meta name="description" content="Speed Wi-Fi Test real-time, uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah secara akurat - Projek independen by Fathi Fadhil." />
     <meta name="keywords" content="speed wifi, fetty wifi, wifi rumah, WIFI-Rumah, fathi fadhil, WIFI-Rumah by Fathi Fadhil, speedtest wifi rumah, cek speed wifi, tes kecepatan internet, uji latensi wifi" />
     <meta name="author" content="Fathi Fadhil" />
     <meta name="robots" content="index, follow" />
@@ -18,7 +18,7 @@
     <meta property="og:site_name" content="WIFI-Rumah" />
     <meta property="og:url" content="https://wifi.fetyy.my.id/kecepatan.html" />
     <meta property="og:title" content="Speed Wi-Fi - Uji Kecepatan Internet | WIFI-Rumah" />
-    <meta property="og:description" content="Speed Wi-Fi Test real-time by Fathi Fadhil (Fetty Wi-Fi) - Uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah secara akurat." />
+    <meta property="og:description" content="Speed Wi-Fi Test real-time, uji kecepatan unduh, unggah, latensi, dan jitter jaringan Wi-Fi rumah secara akurat - Projek independen by Fathi Fadhil." />
     <meta property="og:image" content="https://wifi.fetyy.my.id/logo/logo.png" />
     <meta property="og:image:alt" content="Logo WIFI-Rumah" />
 
@@ -28,7 +28,9 @@
     <link rel="icon" type="image/png" sizes="48x48" href="/logo/favicon-48x48.png" />
     <link rel="icon" type="image/png" sizes="96x96" href="/logo/favicon-96x96.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/logo/favicon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo/favicon-512x512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/logo/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -147,7 +149,7 @@
                 <div
                     class="flex items-center gap-4 text-left neu-inset-sm px-5 py-4 rounded-2xl w-full max-w-sm">
                     <div
-                        class="w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-primary neu-circle">
+                        class="w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-cyan-accent neu-circle">
                         <span class="material-symbols-outlined icon-fill-0 text-2xl">&#xe894;</span>
                     </div>
                     <div class="flex flex-col">
@@ -259,7 +261,7 @@
             <div class="neu-card-lg rounded-3xl overflow-hidden">
                 <div class="px-5 py-4 flex justify-between items-center border-b border-neu-dark/15">
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xl">&#xe889;</span>
+                        <span class="material-symbols-outlined text-text-muted text-xl">&#xe889;</span>
                         <span class="font-bold text-sm text-text-primary uppercase tracking-wider">Riwayat Tes</span>
                     </div>
                     <div class="flex items-center gap-2">
@@ -993,9 +995,9 @@
                             <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
                                 <!-- Unduh (Download) -->
                                 <div class="flex items-center gap-1.5 min-w-0">
-                                    <span class="material-symbols-outlined text-[15px] text-primary shrink-0">&#xe5db;</span>
+                                    <span class="material-symbols-outlined text-[15px] text-cyan-accent shrink-0">&#xe5db;</span>
                                     <span class="text-text-muted shrink-0">Unduh:</span>
-                                    <span class="font-bold text-primary break-all">${entry.speed ? entry.speed + ' Mbps' : '-'}</span>
+                                    <span class="font-bold text-cyan-accent break-all">${entry.speed ? entry.speed + ' Mbps' : '-'}</span>
                                 </div>
 
                                 <!-- Upload -->
@@ -1023,7 +1025,7 @@
 
                                 <!-- ISP (Full width on span-2 for maximum readability) -->
                                 <div class="flex items-start gap-1.5 min-w-0 col-span-2 pt-0.5">
-                                    <span class="material-symbols-outlined text-[15px] text-primary/80 shrink-0 mt-0.5">&#xe894;</span>
+                                    <span class="material-symbols-outlined text-[15px] text-cyan-accent shrink-0 mt-0.5">&#xe894;</span>
                                     <div class="flex flex-wrap items-baseline gap-1 break-words min-w-0">
                                         <span class="text-text-muted shrink-0">ISP:</span>
                                         <span class="font-semibold text-text-primary break-words leading-tight">${entry.isp || '-'}</span>

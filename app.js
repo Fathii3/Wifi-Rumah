@@ -51,6 +51,11 @@ function isHomePage() {
     return path === '' || path === '/' || path.endsWith('/index.html') || path.endsWith('/index') || path.endsWith('index.html');
 }
 
+function isSpeedPage() {
+    const path = window.location.pathname;
+    return path.endsWith('/kecepatan.html') || path.endsWith('kecepatan.html');
+}
+
 // Logika Akses & Blokir 1 Hari
 let blockedTimerInterval = null;
 
@@ -87,6 +92,9 @@ function startBlockedCountdown(blockedTimestamp) {
 }
 
 function checkAccessStatus() {
+    // Halaman kecepatan bebas diakses tanpa perijinan
+    if (isSpeedPage()) return;
+
     const status = localStorage.getItem('wifi_access_status');
     const timestamp = localStorage.getItem('wifi_access_time');
 

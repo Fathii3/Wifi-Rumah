@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "wifi-rumah.vercel.app"
+        }
+      ],
+      "destination": "https://wifi.fetyy.my.id/$1",
+      "permanent": false
+    }
+  ]
+}

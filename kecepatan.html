@@ -211,31 +211,30 @@
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid grid-cols-3 gap-3 w-full mb-8 relative z-10">
-                <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
-                    <span
-                        class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Ping</span>
-                    <div class="flex items-baseline gap-1" id="ping-result">
-                        <span class="text-2xl font-bold text-primary" id="ping-value">--</span>
-                        <span class="text-sm font-medium text-text-muted">ms</span>
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full mb-8 relative z-10">
+                <div class="neu-card-sm rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[92px] sm:min-h-[105px]">
+                    <span class="text-text-muted font-label-caps text-[10px] sm:text-xs uppercase tracking-wider font-bold">Ping</span>
+                    <div class="flex items-baseline justify-center gap-0.5 sm:gap-1 w-full" id="ping-result">
+                        <span class="text-lg sm:text-2xl font-bold text-primary tracking-tight" id="ping-value">--</span>
+                        <span class="text-[11px] sm:text-sm font-medium text-text-muted">ms</span>
                     </div>
-                    <span class="text-[9px] text-text-muted mt-0.5 opacity-70">ke server Cloudflare</span>
+                    <span class="text-[8px] sm:text-[9px] text-text-muted opacity-70 truncate max-w-full">Cloudflare</span>
                 </div>
-                <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
-                    <span
-                        class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Upload</span>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-2xl font-bold text-primary" id="upload-value">--</span>
-                        <span class="text-sm font-medium text-text-muted">Mbps</span>
+                <div class="neu-card-sm rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[92px] sm:min-h-[105px]">
+                    <span class="text-text-muted font-label-caps text-[10px] sm:text-xs uppercase tracking-wider font-bold">Upload</span>
+                    <div class="flex items-baseline justify-center gap-0.5 sm:gap-1 w-full">
+                        <span class="text-lg sm:text-2xl font-bold text-primary tracking-tight" id="upload-value">--</span>
+                        <span class="text-[11px] sm:text-sm font-medium text-text-muted">Mbps</span>
                     </div>
+                    <span class="text-[8px] sm:text-[9px] text-text-muted opacity-70">Unggah</span>
                 </div>
-                <div class="neu-card-sm rounded-3xl p-4 flex flex-col items-center">
-                    <span
-                        class="text-text-muted font-label-caps text-xs mb-1 uppercase tracking-wider font-bold">Unduh</span>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-2xl font-bold text-primary" id="download-value">--</span>
-                        <span class="text-sm font-medium text-text-muted">Mbps</span>
+                <div class="neu-card-sm rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[92px] sm:min-h-[105px]">
+                    <span class="text-text-muted font-label-caps text-[10px] sm:text-xs uppercase tracking-wider font-bold">Unduh</span>
+                    <div class="flex items-baseline justify-center gap-0.5 sm:gap-1 w-full">
+                        <span class="text-lg sm:text-2xl font-bold text-primary tracking-tight" id="download-value">--</span>
+                        <span class="text-[11px] sm:text-sm font-medium text-text-muted">Mbps</span>
                     </div>
+                    <span class="text-[8px] sm:text-[9px] text-text-muted opacity-70">Download</span>
                 </div>
             </div>
 

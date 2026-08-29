@@ -33,7 +33,7 @@
 - [Menghubungkan Backend Lokal ke Cloud (HTTP to HTTPS via Ngrok)](#menghubungkan-backend-lokal-ke-cloud-http-to-https-via-ngrok)
 - [Menjalankan Aplikasi](#menjalankan-aplikasi)
 - [Akses Panel Admin Router](#akses-panel-admin-router)
-- [Kontributor & Lisensi](#kontributor--lisensi)
+- [Kontributor](#kontributor)
 
 ---
 
@@ -231,9 +231,8 @@ Gunakan informasi di bawah ini jika Anda perlu masuk langsung ke pengaturan rout
 
 ---
 
-## Kontributor & Lisensi
+## Kontributor
 
-Dibuat dengan rasa bangga untuk **Keluarga Pak Harun**.  
-Lisensi: [ISC License](package.json)
+Dibuat dengan rasa bangga untuk **Keluarga**.
 
 

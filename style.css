@@ -98,11 +98,9 @@ textarea {
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
 }
 
-/* ==========================================================================
-   Neumorphism Component Classes
-   ========================================================================== */
+/* Neumorphism Component Classes */
 
-/* --- Cards & Panels --- */
+/* Cards & Panels */
 .neu-card {
     background: var(--neu-surface);
     box-shadow: var(--neu-raised);
@@ -131,7 +129,7 @@ textarea {
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-/* --- Inset / Recessed Containers --- */
+/* Inset / Recessed Containers */
 .neu-inset {
     background: var(--neu-surface);
     box-shadow: var(--neu-inset);
@@ -153,7 +151,7 @@ textarea {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* --- Buttons --- */
+/* Buttons */
 .neu-btn {
     background: var(--neu-surface);
     box-shadow: var(--neu-btn);
@@ -240,7 +238,7 @@ textarea {
     box-shadow: var(--neu-btn-pressed);
 }
 
-/* --- Circular Neumorphic Element --- */
+/* Circular Element */
 .neu-circle {
     background: var(--neu-surface);
     box-shadow: var(--neu-raised);
@@ -255,7 +253,7 @@ textarea {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* --- Status Dot with soft glow --- */
+/* Status Dot */
 .neu-status-dot {
     width: 10px;
     height: 10px;
@@ -278,7 +276,7 @@ textarea {
     box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
 }
 
-/* --- Navbar Neumorphic --- */
+/* Navbar */
 .neu-navbar {
     background: var(--neu-surface);
     box-shadow: var(--neu-raised-lg);
@@ -301,7 +299,7 @@ textarea {
     color: var(--accent-primary);
 }
 
-/* --- QR Code Pedestal --- */
+/* QR Code Pedestal */
 .neu-qr-pedestal {
     background: #ffffff;
     box-shadow: var(--neu-inset);
@@ -309,7 +307,7 @@ textarea {
     border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* --- Modal Overlay --- */
+/* Modal Overlay */
 .neu-modal-overlay {
     background: rgba(224, 229, 236, 0.7);
     backdrop-filter: blur(8px);
@@ -323,10 +321,7 @@ textarea {
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-/* ==========================================================================
-   Legacy Glassmorphism Classes (remapped to Neumorphism)
-   Keep for backward compatibility with JS that toggles these classes
-   ========================================================================== */
+/* Legacy Glassmorphism Classes */
 .glass-panel {
     background: var(--neu-surface);
     box-shadow: var(--neu-raised-sm);
@@ -361,9 +356,7 @@ textarea {
     overflow: hidden;
 }
 
-/* ==========================================================================
-   Animations & Hover Utilities (Neumorphism-adapted)
-   ========================================================================== */
+/* Animations & Hover Utilities */
 @keyframes float {
 
     0%,
@@ -419,9 +412,7 @@ button:hover .material-symbols-outlined {
     transform: scale(0.98);
 }
 
-/* ==========================================================================
-   Speedometer Gauge & Labels
-   ========================================================================== */
+/* Speedometer Gauge & Labels */
 .gauge-rotate {
     transform: rotate(135deg);
 }
@@ -469,9 +460,7 @@ button:hover .material-symbols-outlined {
     transform: translate(-50%, -50%);
 }
 
-/* ==========================================================================
-   Neumorphic Background - subtle, no blobs
-   ========================================================================== */
+/* Background Utilities */
 .bg-glow {
     display: none;
 }
@@ -484,9 +473,7 @@ button:hover .material-symbols-outlined {
     z-index: 0;
 }
 
-/* ==========================================================================
-   Modern Neumorphic Custom Scrollbar
-   ========================================================================== */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

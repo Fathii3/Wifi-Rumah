@@ -1,4 +1,4 @@
-// Serverless Function Vercel (Konfigurasi Wi-Fi Backend)
+// Serverless Function Vercel (Config Wi-Fi)
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // Nilai default (contoh). Konfigurasi Wi-Fi asli tersimpan aman di Vercel Environment Variables / Edge Config
+    // Default fallback
     let ssid = "Nama_Wifi_Contoh";
     let password = "PasswordContoh123";
     let encryption = "WPA";

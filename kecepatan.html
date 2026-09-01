@@ -121,7 +121,7 @@
 
 <body class="bg-neu-bg text-text-primary font-body-lg min-h-screen overflow-x-hidden selection:bg-primary/20">
 
-<!-- SVG Filter Definition -->
+<!-- SVG Filter -->
 <svg class="svg-hidden-defs" aria-hidden="true" focusable="false">
   <defs>
     <filter id="liquid-glass" x="-30%" y="-30%" width="160%" height="160%">
@@ -255,8 +255,8 @@
             </div>
         </div>
 
-        <!-- History Panel (below main card) -->
-        <div id="history-panel" class="w-full max-w-md mx-auto mt-6 hidden">
+    <!-- History Panel -->
+    <div id="history-panel" class="w-full max-w-md mx-auto mt-6 hidden">
             <div class="neu-card-lg rounded-3xl overflow-hidden">
                 <div class="px-5 py-4 flex justify-between items-center border-b border-neu-dark/15">
                     <div class="flex items-center gap-2">
@@ -279,7 +279,7 @@
         </div>
     </div>
 
-    <!-- Modal Konfirmasi Hapus Riwayat (Neumorphic) -->
+    <!-- Modal Konfirmasi Hapus Riwayat -->
     <div id="clear-confirm-modal" class="fixed inset-0 z-[100] flex items-center justify-center px-4 neu-modal-overlay hidden">
         <div class="neu-modal p-6 md:p-8 max-w-sm w-full text-center flex flex-col items-center">
             <div class="w-14 h-14 rounded-full flex items-center justify-center text-error neu-circle mb-4">
@@ -299,9 +299,7 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- GLOBAL BUBBLE NAVBAR (Neumorphic)              -->
-    <!-- ============================================== -->
+    <!-- Global Bubble Navbar -->
     <div class="fixed bottom-6 left-0 w-full z-50 flex justify-center pointer-events-none px-4">
         <nav
             class="pointer-events-auto flex justify-between items-center px-6 py-2 gap-4 md:gap-10 neu-navbar">
@@ -512,9 +510,7 @@
             animFrameId = requestAnimationFrame(updateGaugeSmoothly);
 
             try {
-                // =============================================
-                // FASE 1: PING
-                // =============================================
+                // Fase 1: Ping
                 targetMbps = 3.5;
                 const pingSamples = [];
 
@@ -572,9 +568,7 @@
                 targetMbps = 0.5;
                 await new Promise(r => setTimeout(r, 250));
 
-                // =============================================
-                // FASE 2: UNDUH (DOWNLOAD)
-                // =============================================
+                // Fase 2: Download
                 btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Unduh...';
                 if (unitDisplay) unitDisplay.innerHTML = '<span class="text-[9px] block opacity-60">UNDUH</span>MBPS';
 
@@ -684,15 +678,11 @@
 
                 await new Promise(r => setTimeout(r, 800));
 
-                // =============================================
-                // TRANSISI: Reset gauge untuk upload
-                // =============================================
+                // Transisi: Reset gauge untuk upload
                 await resetGaugeSmooth();
                 await new Promise(r => setTimeout(r, 300));
 
-                // =============================================
-                // FASE 3: UPLOAD
-                // =============================================
+                // Fase 3: Upload
                 btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menguji Upload...';
                 if (unitDisplay) unitDisplay.innerHTML = '<span class="text-[9px] block opacity-60">UPLOAD</span>MBPS';
 
@@ -798,9 +788,7 @@
                     if (uploadDisplay) uploadDisplay.innerText = '--';
                 }
 
-                // =============================================
-                // FASE AKHIR: Selesai
-                // =============================================
+                // Fase Akhir: Selesai
                 isTestingActive = false;
                 if (unitDisplay) unitDisplay.innerText = 'MBPS';
 
@@ -814,7 +802,7 @@
                             animFrameId = null;
                         }
 
-                        // Gauge menunjukkan kecepatan download sebagai "final display" (seperti Ookla)
+                        // Final display kecepatan download
                         currentDisplayMbps = calculatedFinalMbps > 0 ? calculatedFinalMbps : 0;
                         targetMbps = currentDisplayMbps;
                         valueDisplay.innerText = currentDisplayMbps.toFixed(2);
@@ -823,7 +811,6 @@
                         meter.style.strokeDashoffset = (330 - (330 * progress)).toFixed(2);
                         needle.style.transform = `rotate(${(progress * 270).toFixed(2)}deg)`;
 
-                        // Pastikan angka di card TIDAK di-override
                         if (downloadDisplay) downloadDisplay.innerText = calculatedFinalMbps.toFixed(2);
                         if (uploadDisplay && calculatedUploadMbps > 0) uploadDisplay.innerText = calculatedUploadMbps.toFixed(2);
 
@@ -831,7 +818,7 @@
                         hasTestedOnce = true;
                         btn.innerHTML = '<span class="material-symbols-outlined">&#xe5d5;</span> Ulangi Tes';
 
-                        // Save result to local history
+                        // Simpan riwayat
                         const finalPing = parseInt(pingDisplay.innerText) || accuratePing || 0;
                         saveSpeedResult(finalPing, calculatedFinalMbps, calculatedUploadMbps);
                     }, 500);
@@ -849,9 +836,7 @@
             }
         }
 
-        // ==========================================
-        // SPEED TEST HISTORY (localStorage)
-        // ==========================================
+        // Riwayat Speed Test (localStorage)
         const HISTORY_KEY = 'wifi_speed_history';
         const MAX_HISTORY = 50;
 

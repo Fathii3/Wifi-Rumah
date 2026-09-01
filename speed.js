@@ -1,4 +1,4 @@
-// speed.js - Logika Pengukur Kecepatan (Speed Test)
+// Logika Speed Test
 let isTesting = false;
 let animationFrameId = null;
 let currentDisplayedSpeed = 0;

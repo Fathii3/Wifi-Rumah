@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.static(__dirname));
 
-// Memuat variabel lingkungan dari file .env jika ada
+// Load .env
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
     if (typeof process.loadEnvFile === 'function') {

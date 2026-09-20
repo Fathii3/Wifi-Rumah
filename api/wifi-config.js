@@ -13,10 +13,10 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // Default fallback
-    let ssid = "Nama_Wifi_Contoh";
-    let password = "PasswordContoh123";
-    let encryption = "WPA";
+    // Default fallback hierarchy: Edge Config -> process.env -> Default hardcoded
+    let ssid = process.env.WIFI_SSID || "Nama_Wifi_Contoh";
+    let password = process.env.WIFI_PASSWORD || "PasswordContoh123";
+    let encryption = process.env.WIFI_ENCRYPTION || "WPA";
 
     if (process.env.EDGE_CONFIG) {
         try {
@@ -31,10 +31,6 @@ module.exports = async (req, res) => {
         } catch (e) {
             console.error("Gagal Edge Config:", e.message);
         }
-    } else {
-        if (process.env.WIFI_SSID) ssid = process.env.WIFI_SSID;
-        if (process.env.WIFI_PASSWORD) password = process.env.WIFI_PASSWORD;
-        if (process.env.WIFI_ENCRYPTION) encryption = process.env.WIFI_ENCRYPTION;
     }
 
     return res.status(200).json({ ssid, password, encryption });

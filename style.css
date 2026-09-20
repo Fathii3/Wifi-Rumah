@@ -321,41 +321,6 @@ textarea {
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-/* Legacy Glassmorphism Classes */
-.glass-panel {
-    background: var(--neu-surface);
-    box-shadow: var(--neu-raised-sm);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-.glass-panel-high {
-    background: var(--neu-surface);
-    box-shadow: var(--neu-raised-lg);
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-.glass-card {
-    background: var(--neu-surface);
-    box-shadow: var(--neu-raised-sm);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-.svg-hidden-defs {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-}
-
 /* Animations & Hover Utilities */
 @keyframes float {
 
@@ -385,14 +350,6 @@ textarea {
     animation: float 6s ease-in-out infinite;
 }
 
-.animate-duration-8s {
-    animation-duration: 8s !important;
-}
-
-.animate-neu-pulse {
-    animation: neu-pulse 3s ease-in-out infinite;
-}
-
 .nav-btn:hover .material-symbols-outlined,
 button:hover .material-symbols-outlined {
     transform: scale(1.1);
@@ -415,10 +372,6 @@ button:hover .material-symbols-outlined {
 /* Speedometer Gauge & Labels */
 .gauge-rotate {
     transform: rotate(135deg);
-}
-
-.gauge-svg {
-    transform: rotate(-90deg);
 }
 
 .gauge-path {
@@ -458,19 +411,6 @@ button:hover .material-symbols-outlined {
     left: 76.5%;
     top: 76.5%;
     transform: translate(-50%, -50%);
-}
-
-/* Background Utilities */
-.bg-glow {
-    display: none;
-}
-
-.glow-sphere {
-    display: none;
-}
-
-.z-base {
-    z-index: 0;
 }
 
 /* Custom Scrollbar */

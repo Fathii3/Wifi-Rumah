@@ -1,3 +1,5 @@
+// Logika Global: Deteksi ISP, Kontrol Akses & Navigasi
+
 // Deteksi Provider ISP
 function formatISPName(rawName) {
     if (!rawName) return "Jaringan Lokal";
@@ -25,7 +27,7 @@ async function detectISP() {
     const cityElements = document.querySelectorAll('.isp-city-display');
 
     const removeSkeleton = (el) => {
-        el.classList.remove('animate-pulse', 'bg-black/10', 'bg-primary/20', 'bg-primary/15', 'bg-neu-dark/20', 'h-4', 'h-5', 'w-20', 'w-24', 'w-28', 'inline-block', 'rounded', 'mt-1');
+        el.className = cn(el.className.replace(/\banimate-pulse\b|\bbg-\S+|\bh-\d+\b|\bw-\d+\b/g, '').trim());
     };
 
     try {
@@ -33,7 +35,7 @@ async function detectISP() {
         const data = await response.json();
 
         if (data.success) {
-            let ispName = formatISPName(data.connection.isp || data.connection.org || "Jaringan Lokal");
+            const ispName = formatISPName(data.connection.isp || data.connection.org || "Jaringan Lokal");
             const cityName = data.city || "Lokasi Tidak Diketahui";
             ispElements.forEach(el => { removeSkeleton(el); el.innerText = ispName; });
             cityElements.forEach(el => { removeSkeleton(el); el.innerText = cityName; });
@@ -68,7 +70,7 @@ function startBlockedCountdown(blockedTimestamp) {
     function updateTimer() {
         const now = Date.now();
         const blockDuration = 86400000;
-        const expiryTime = parseInt(blockedTimestamp) + blockDuration;
+        const expiryTime = parseInt(blockedTimestamp, 10) + blockDuration;
         const timeLeft = expiryTime - now;
 
         if (timeLeft <= 0) {
@@ -100,7 +102,7 @@ function checkAccessStatus() {
 
     if (timestamp) {
         const now = Date.now();
-        const diff = now - parseInt(timestamp);
+        const diff = now - parseInt(timestamp, 10);
         if (diff > 86400000) {
             localStorage.removeItem('wifi_access_status');
             localStorage.removeItem('wifi_access_time');
@@ -119,44 +121,36 @@ function checkAccessStatus() {
     const screenBeranda = document.getElementById('screen-beranda');
     const screenBlocked = document.getElementById('screen-blocked');
 
-    if (status === 'granted') {
-        if (blockedTimerInterval) {
-            clearInterval(blockedTimerInterval);
-            blockedTimerInterval = null;
-        }
-        if (screenIntro) screenIntro.classList.add('hidden');
-        if (screenBlocked) screenBlocked.classList.add('hidden');
-        if (screenBeranda) screenBeranda.classList.remove('hidden');
+    const isGranted = status === 'granted';
+    const isBlocked = status === 'blocked';
+    const isIntro = !isGranted && !isBlocked;
 
-        if (typeof initWifiConfig === 'function') {
-            initWifiConfig();
-        }
+    if (isBlocked && blockedTimerInterval === null && timestamp) {
+        startBlockedCountdown(timestamp);
+    } else if (!isBlocked && blockedTimerInterval) {
+        clearInterval(blockedTimerInterval);
+        blockedTimerInterval = null;
+    }
 
-    } else if (status === 'blocked') {
-        if (!isHomePage()) {
-            window.location.href = 'index.html';
-        } else {
-            if (screenIntro) screenIntro.classList.add('hidden');
-            if (screenBeranda) screenBeranda.classList.add('hidden');
-            if (screenBlocked) screenBlocked.classList.remove('hidden');
-            startBlockedCountdown(timestamp);
-        }
-    } else {
-        if (blockedTimerInterval) {
-            clearInterval(blockedTimerInterval);
-            blockedTimerInterval = null;
-        }
-        if (!isHomePage()) {
-            window.location.href = 'index.html';
-        } else {
-            if (screenIntro) screenIntro.classList.remove('hidden');
-            if (screenBeranda) screenBeranda.classList.add('hidden');
-            if (screenBlocked) screenBlocked.classList.add('hidden');
-        }
+    if (!isHomePage() && !isGranted) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    if (screenIntro) screenIntro.classList.toggle('hidden', !isIntro);
+    if (screenBeranda) screenBeranda.classList.toggle('hidden', !isGranted);
+    if (screenBlocked) screenBlocked.classList.toggle('hidden', !isBlocked);
+
+    if (isGranted && typeof initWifiConfig === 'function') {
+        initWifiConfig();
     }
 }
 
+let isProcessingContinue = false;
 function handleContinue() {
+    if (isProcessingContinue) return;
+    isProcessingContinue = true;
+
     const modal = document.getElementById('modal-container');
     const title = document.getElementById('modal-title');
     const text = document.getElementById('modal-text');
@@ -166,58 +160,61 @@ function handleContinue() {
     const existingActions = document.getElementById('modal-actions');
     if (existingActions) existingActions.remove();
 
-    modal.classList.remove('hidden');
-    spinner.classList.remove('hidden');
-    title.innerText = "Memproses Izin...";
-    text.innerText = "Sedang memeriksa status perangkat Anda di jaringan Keluarga Pak Harun.";
+    if (modal) modal.classList.remove('hidden');
+    if (spinner) spinner.classList.remove('hidden');
+    if (title) title.innerText = "Memproses Izin...";
+    if (text) text.innerText = "Sedang memeriksa status perangkat Anda di jaringan Keluarga Pak Harun.";
 
     setTimeout(() => {
-        spinner.classList.add('hidden');
-        title.innerText = "Izin Penggunaan";
-        text.innerText = "Apakah Anda sudah meminta izin memakai Wi-Fi ini kepada pemilik rumah?";
+        isProcessingContinue = false;
+        if (spinner) spinner.classList.add('hidden');
+        if (title) title.innerText = "Izin Penggunaan";
+        if (text) text.innerText = "Apakah Anda sudah meminta izin memakai Wi-Fi ini kepada pemilik rumah?";
 
         const actions = document.createElement('div');
         actions.id = "modal-actions";
-        actions.className = "flex gap-3 mt-2";
+        actions.className = cn("flex gap-3 mt-2");
         actions.innerHTML = `
-            <button onclick="blockAccess()" class="flex-1 neu-btn-ghost text-error py-3 rounded-xl font-semibold text-sm">Belum</button>
-            <button onclick="grantAccess()" class="flex-1 neu-btn-primary py-3 rounded-xl font-semibold text-sm">Sudah</button>
+            <button onclick="blockAccess()" class="${cn('flex-1 neu-btn-ghost text-error py-3 rounded-xl font-semibold text-sm')}">Belum</button>
+            <button onclick="grantAccess()" class="${cn('flex-1 neu-btn-primary py-3 rounded-xl font-semibold text-sm')}">Sudah</button>
         `;
-        content.appendChild(actions);
+        if (content) content.appendChild(actions);
     }, 1500);
 }
 
 function grantAccess() {
     localStorage.setItem('wifi_access_status', 'granted');
     localStorage.setItem('wifi_access_time', Date.now().toString());
-    document.getElementById('modal-container').classList.add('hidden');
+    const modal = document.getElementById('modal-container');
+    if (modal) modal.classList.add('hidden');
     checkAccessStatus();
 }
 
 function blockAccess() {
     localStorage.setItem('wifi_access_status', 'blocked');
     localStorage.setItem('wifi_access_time', Date.now().toString());
-    document.getElementById('modal-container').classList.add('hidden');
+    const modal = document.getElementById('modal-container');
+    if (modal) modal.classList.add('hidden');
     checkAccessStatus();
 }
 
-// Active Navbar Sync
+// Active Navbar Sync dengan cn
 function updateActiveNav() {
     const currentPath = window.location.pathname;
     document.querySelectorAll('.nav-btn').forEach(btn => {
         const target = btn.getAttribute('href');
         if (!target) return;
 
-        if (currentPath.includes(target) || (target === 'index.html' && (currentPath.endsWith('/') || currentPath === ''))) {
-            btn.classList.add('text-primary', 'scale-110');
-            btn.classList.remove('text-on-surface-variant', 'text-text-muted');
-            const icon = btn.querySelector('span:first-child');
-            if (icon) icon.style.fontVariationSettings = "'FILL' 1";
-        } else {
-            btn.classList.remove('text-primary', 'scale-110');
-            btn.classList.add('text-text-muted');
-            const icon = btn.querySelector('span:first-child');
-            if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+        const isActive = currentPath.includes(target) || (target === 'index.html' && (currentPath.endsWith('/') || currentPath === ''));
+
+        btn.className = cn(
+            'nav-btn neu-nav-item flex flex-col items-center justify-center p-2 transition-all cursor-pointer',
+            isActive ? 'text-primary scale-110 active' : 'text-text-muted hover:text-primary'
+        );
+
+        const icon = btn.querySelector('span:first-child');
+        if (icon) {
+            icon.style.fontVariationSettings = isActive ? "'FILL' 1" : "'FILL' 0";
         }
     });
 }

@@ -2,7 +2,7 @@
   "name": "wifi-rumah",
   "version": "1.0.0",
   "description": "Website portofolio/utilitas pribadi dengan tampilan antarmuka *Glassmorphism* modern. Dibuat untuk mempermudah tamu menyambung ke jaringan Wi-Fi rumah melalui pemindaian QR Code atau dengan menyalin kata sandi.",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"

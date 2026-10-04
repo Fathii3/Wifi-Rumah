@@ -45,8 +45,6 @@
 
 ## Ringkasan Proyek
 
-> 🌐 **Live Website:** [https://wifi.fetyy.my.id/](https://wifi.fetyy.my.id/)
-
 **Wi-Fi Rumah** adalah aplikasi web utilitas jaringan modern yang dirancang untuk mempermudah tamu rumah terhubung ke jaringan Wi-Fi secara instan melalui pemindaian QR Code dinamis tanpa perlu mengetik kata sandi secara manual, sekaligus memberikan kontrol penuh bagi pemilik rumah untuk memantau performa kecepatan internet dan daftar perangkat aktif secara *real-time*.
 
 Dibangun dengan pendekatan estetika **Neumorphism (Soft UI)** yang bersih, taktil, responsif, dan elegan di semua ukuran layar (Smartphone, Tablet, Laptop, maupun Monitor Desktop).

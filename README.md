@@ -9,6 +9,12 @@
 </p>
 
 <p align="center">
+  <a href="https://wifi.fetyy.my.id/" target="_blank">
+    <img src="https://img.shields.io/badge/_Live_Demo-wifi.fetyy.my.id-4f46e5?style=flat&logoColor=white" alt="Live Demo" />
+  </a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black" alt="JavaScript" />
@@ -38,6 +44,8 @@
 ---
 
 ## Ringkasan Proyek
+
+> 🌐 **Live Website:** [https://wifi.fetyy.my.id/](https://wifi.fetyy.my.id/)
 
 **Wi-Fi Rumah** adalah aplikasi web utilitas jaringan modern yang dirancang untuk mempermudah tamu rumah terhubung ke jaringan Wi-Fi secara instan melalui pemindaian QR Code dinamis tanpa perlu mengetik kata sandi secara manual, sekaligus memberikan kontrol penuh bagi pemilik rumah untuk memantau performa kecepatan internet dan daftar perangkat aktif secara *real-time*.
 
